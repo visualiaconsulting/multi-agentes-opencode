@@ -1,0 +1,9 @@
+node_modules/
+__pycache__/
+*.pyc
+.env
+.opencode/logs/
+.opencode/cache/
+.DS_Store
+dist/
+build/
