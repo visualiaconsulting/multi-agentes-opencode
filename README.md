@@ -40,7 +40,7 @@
 | **@code-analyst** | `deepseek-v4-pro` | 💻 Senior Engineer — writes clean code, implements features | `edit` `bash` `read` |
 | **@validator** | `kimi-k2.6` | 🔍 QA Specialist — validates quality, reviews code | `read` only |
 | **@bulk-processor** | `deepseek-v4-flash` | ⚡ Data Processor — handles repetitive, high-volume tasks (hidden) | `edit` `bash` `read` |
-| **@subagent** | `mimo-v2.5-pro` | 🛠️ Debugger — auxiliary tasks and fallback agent | `edit` `bash` `read` |
+| **@subagent** | `glm-5.1` | 🛠️ Debugger — auxiliary tasks and fallback agent | `edit` `bash` `read` |
 
 > **How it works:** You give a task to `@orchestrator`. It analyzes, plans, and delegates to the right specialist(s). The validator checks quality before returning results.
 
@@ -188,14 +188,20 @@ oh-my-agents/
 
 ## 📝 Changelog
 
+### v0.9.2.1 — Subagent Model Fix + Multi-Plan Support (April 2026)
+
+- Subagent model changed from `mimo-v2.5-pro` to `glm-5.1` (no more duplicates)
+- New plans added to PlanManager: OpenRouter, Copilot, Ollama
+- All agent permissions verified and documented correctly
+- Deprecated Qwen models removed from available models list
+
 ### v0.9.2.0 — Rebrand to oh-my-agents (April 2026)
 
-**New identity:** The project has been renamed from `multi-agentes-opencode` to `oh-my-agents` for better memorability, discoverability, and alignment with trending GitHub naming patterns.
+**New identity:** Renamed from `multi-agentes-opencode` to `oh-my-agents` for better memorability and alignment with trending GitHub naming patterns.
 
-- Renamed repository to `oh-my-agents`
 - Updated all documentation and references
 - Explicit OpenCode branding throughout
-- Verified all agents use distinct models from the OpenCode Go registry
+- Banner updated with VisualIA Consulting credit and MIT license
 
 ### v0.9.1.0 — Base Project Sync (April 2026)
 

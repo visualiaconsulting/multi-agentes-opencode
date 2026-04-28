@@ -2,7 +2,7 @@
 name: subagent
 description: Agente de reserva y tareas genéricas
 mode: subagent
-model: opencode-go/mimo-v2.5-pro
+model: opencode-go/glm-5.1
 temperature: 0.2
 permission:
   edit: allow

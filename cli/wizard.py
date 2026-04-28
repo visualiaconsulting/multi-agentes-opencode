@@ -60,7 +60,7 @@ class SetupWizard:
         table.add_row("code-analyst", "opencode-go/deepseek-v4-pro", "Subagent")
         table.add_row("validator", "opencode-go/kimi-k2.6", "Subagent")
         table.add_row("bulk-processor", "opencode-go/deepseek-v4-flash", "Subagent")
-        table.add_row("subagent", "opencode-go/mimo-v2.5-pro", "Reserva")
+        table.add_row("subagent", "opencode-go/glm-5.1", "Reserva")
         table.add_row("fallback", "opencode-go/minimax-m2.5", "Speed/Recovery")
         
         console.print(table)
@@ -73,7 +73,7 @@ class SetupWizard:
             {"name": "code-analyst", "role": "subagent", "model": "opencode-go/deepseek-v4-pro", "desc": "Ingeniero de software senior"},
             {"name": "validator", "role": "subagent", "model": "opencode-go/kimi-k2.6", "desc": "QA y validador de código"},
             {"name": "bulk-processor", "role": "subagent", "model": "opencode-go/deepseek-v4-flash", "desc": "Procesamiento masivo de datos"},
-            {"name": "subagent", "role": "subagent", "model": "opencode-go/mimo-v2.5-pro", "desc": "Agente de reserva y tareas genéricas"}
+            {"name": "subagent", "role": "subagent", "model": "opencode-go/glm-5.1", "desc": "Agente de reserva y tareas genéricas"}
         ]
 
         permissions_map = {

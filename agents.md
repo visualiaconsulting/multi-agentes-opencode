@@ -6,7 +6,7 @@ Este documento describe la configuración, estado y arquitectura del sistema mul
 
 ## 📋 Resumen del Sistema
 
-El proyecto implementa una arquitectura de **Orquestador y Especialistas** sobre el plan **OpenCode Go** por defecto, con capacidad de adaptación dinámica a otros planes (Zen, API, Enterprise) mediante el `PlanManager`.
+El proyecto implementa una arquitectura de **Orquestador y Especialistas** sobre el plan **OpenCode Go** por defecto, con capacidad de adaptación dinámica a otros planes (Zen, API, Enterprise, OpenRouter, Copilot, Ollama) mediante el `PlanManager`.
 
 | Componente | Descripción |
 |------------|-------------|
@@ -20,17 +20,17 @@ El proyecto implementa una arquitectura de **Orquestador y Especialistas** sobre
 
 | Agente | Rol | Modelo (Plan Go) | Permisos | Descripción |
 | :--- | :--- | :--- | :--- | :--- |
-| **@orchestrator** | Coordinador Principal | `opencode-go/mimo-v2.5-pro` | `Edit, Bash, Read, Task` | Divide tareas complejas y delega a subagentes. |
+| **@orchestrator** | Coordinador Principal | `opencode-go/mimo-v2.5-pro` | `Read, Task` | Divide tareas complejas y delega a subagentes. NO escribe código ni ejecuta comandos. |
 | **@code-analyst** | Ingeniero Senior | `opencode-go/deepseek-v4-pro` | `Edit, Bash, Read` | Implementación de código limpio y arquitectura. |
 | **@validator** | Especialista QA | `opencode-go/kimi-k2.6` | `Read Only` | Validación, linting y revisión de calidad. Sin edición ni bash. |
 | **@bulk-processor** | Procesador de Datos | `opencode-go/deepseek-v4-flash` | `Edit, Bash, Read` | Tareas repetitivas y de gran volumen (oculto). |
-| **@subagent** | Depurador/Reserva | `opencode-go/mimo-v2.5-pro` | `Edit, Bash, Read` | Agente genérico para depuración y tareas auxiliares. |
+| **@subagent** | Depurador/Reserva | `opencode-go/glm-5.1` | `Edit, Bash, Read` | Agente genérico para depuración y tareas auxiliares. |
 
 ### 🔍 Detalle de Permisos por Agente
 
 | Agente | edit | bash | read | task |
 |--------|:----:|:----:|:----:|:----:|
-| **@orchestrator** | ✅ allow | ✅ allow | ✅ allow | ✅ allow |
+| **@orchestrator** | ❌ deny | ❌ deny | ✅ allow | ✅ allow |
 | **@code-analyst** | ✅ allow | ✅ allow | ✅ allow | ❌ deny |
 | **@validator** | ❌ deny | ❌ deny | ✅ allow | ❌ deny |
 | **@bulk-processor** | ✅ allow | ✅ allow | ✅ allow | ❌ deny |
@@ -44,10 +44,10 @@ El proyecto implementa una arquitectura de **Orquestador y Especialistas** sobre
 
 El `PlanManager` es el cerebro lógico que gestiona la configuración de agentes según el plan detectado:
 
-- **Detección de Plan:** Identifica automáticamente si se está en `go`, `zen`, `api` o `enterprise` usando variables de entorno y archivos de configuración.
-- **Mapeo de Modelos:** Asocia cada rol (`orchestrator`, `code-analyst`, `validator`, `bulk-processor`) con el modelo óptimo para el plan activo.
-- **Fallbacks:** Proporciona modelos de respaldo (ej. `MiniMax M2.5`) si el principal no está disponible.
-- **Validación de API Keys:** Verifica que los proveedores externos tengan las credenciales necesarias (solo para plan `api`).
+- **Detección de Plan:** Identifica automáticamente si se está en `go`, `zen`, `api`, `enterprise`, `openrouter`, `copilot` u `ollama` usando variables de entorno y archivos de configuración.
+- **Mapeo de Modelos:** Asocia cada rol (`orchestrator`, `code-analyst`, `validator`, `bulk-processor`, `subagent`) con el modelo óptimo para el plan activo.
+- **Fallbacks:** Proporciona modelos de respaldo si el principal no está disponible.
+- **Validación de API Keys:** Verifica que los proveedores externos tengan las credenciales necesarias (solo para planes `api` y `openrouter`).
 
 **Modelos por defecto en Plan Go:**
 
@@ -57,11 +57,12 @@ El `PlanManager` es el cerebro lógico que gestiona la configuración de agentes
 | Code Analyst | `opencode-go/deepseek-v4-pro` |
 | Validator | `opencode-go/kimi-k2.6` |
 | Bulk Processor | `opencode-go/deepseek-v4-flash` |
+| Subagent | `opencode-go/glm-5.1` |
 | Fallback | `opencode-go/minimax-m2.5` |
 
 ### ~~`opencode.jsonc`~~ — Eliminado
 
-> **Nota:** El archivo `opencode.jsonc` fue eliminado porque causaba conflictos de configuración. El proyecto base (`carbon_footprint_tracker`) funciona correctamente sin él. OpenCode lee la configuración directamente de los archivos `.opencode/agents/*.md`.
+> **Nota:** El archivo `opencode.jsonc` fue eliminado porque causaba conflictos de configuración. OpenCode lee la configuración directamente de los archivos `.opencode/agents/*.md`.
 
 ### `main.py` — CLI del Sistema
 
@@ -72,7 +73,7 @@ Interfaz de línea de comandos que:
 
 ### `cli/wizard.py` — Asistente de Configuración
 
-Wizard interactivo que propone configuraciones por defecto o guía al usuario en la creación manual de agentes. Por defecto asigna `GLM-5.1` al orquestador.
+Wizard interactivo que propone configuraciones por defecto o guía al usuario en la creación manual de agentes. Por defecto asigna `opencode-go/mimo-v2.5-pro` al orquestador.
 
 ### `cli/ui.py` — Interfaz de Usuario
 
@@ -84,7 +85,7 @@ Componentes visuales con `rich` para terminal: banners, tablas de agentes, panel
 
 Los modelos **Qwen3.6 Plus** y **Qwen3.5 Plus** están marcados como `deprecated` en el registry de OpenCode.
 
-> **Solución aplicada:** Se cambió el modelo del orquestador a `opencode-go/mimo-v2.5-pro` (igual que el proyecto base que funciona sin errores). Se eliminó `opencode.jsonc` que causaba conflictos.
+> **Solución aplicada:** Se eliminaron de la lista de modelos disponibles en `plan_manager.py`. Se cambió el modelo del orquestador a `opencode-go/mimo-v2.5-pro`. Se eliminó `opencode.jsonc` que causaba conflictos.
 
 ### Referencia
 - Issue: [#22644](https://github.com/anomalyco/opencode/issues/22644)
@@ -93,14 +94,20 @@ Los modelos **Qwen3.6 Plus** y **Qwen3.5 Plus** están marcados como `deprecated
 
 ## 📝 Changelog
 
-### v0.9.2.0 — Rebrand to oh-my-agents (April 2026)
+### v0.9.2.1 — Modelo Subagent Corregido + Preparación Multi-Plan (April 2026)
 
-**New identity:** The project has been renamed from `multi-agentes-opencode` to `oh-my-agents` for better memorability, discoverability, and alignment with trending GitHub naming patterns.
+**Modelo subagent:** Cambiado de `opencode-go/mimo-v2.5-pro` a `opencode-go/glm-5.1` para eliminar duplicación con el orchestrator.
 
-- Renamed repository to `oh-my-agents`
-- Updated all documentation and references
-- Explicit OpenCode branding throughout
-- Verified all agents use distinct models from the OpenCode Go registry
+**Nuevos planes soportados en PlanManager:**
+- `openrouter` — Modelos configurables vía OPENROUTER_API_KEY
+- `copilot` — GitHub Copilot models
+- `ollama` — Modelos locales auto-hospedados
+
+**Correcciones de documentación:**
+- AGENTS.md: Permisos del orchestrator corregidos a `read + task` (no edit/bash)
+- AGENTS.md: Eliminada nota contradictoria sobre reversión de permisos
+- AGENTS.md: Referencias a GLM-5.1 actualizadas a mimo-v2.5-pro
+- README.md: Modelo del subagent actualizado
 
 **Modelos finales (sin duplicados):**
 
@@ -110,7 +117,18 @@ Los modelos **Qwen3.6 Plus** y **Qwen3.5 Plus** están marcados como `deprecated
 | @code-analyst | `opencode-go/deepseek-v4-pro` |
 | @validator | `opencode-go/kimi-k2.6` |
 | @bulk-processor | `opencode-go/deepseek-v4-flash` |
-| @subagent | `opencode-go/mimo-v2.5-pro` |
+| @subagent | `opencode-go/glm-5.1` |
+
+---
+
+### v0.9.2.0 — Rebrand to oh-my-agents (April 2026)
+
+**New identity:** The project has been renamed from `multi-agentes-opencode` to `oh-my-agents` for better memorability, discoverability, and alignment with trending GitHub naming patterns.
+
+- Renamed repository to `oh-my-agents`
+- Updated all documentation and references
+- Explicit OpenCode branding throughout
+- Banner updated with VisualIA Consulting credit and MIT license
 
 ---
 
@@ -124,12 +142,12 @@ Los modelos **Qwen3.6 Plus** y **Qwen3.5 Plus** están marcados como `deprecated
 | `code-analyst.md` | `model: DeepSeek V4 Pro` | `model: opencode-go/deepseek-v4-pro` |
 | `validator.md` | `model: Kimi K2.6` | `model: opencode-go/kimi-k2.6` |
 | `bulk-processor.md` | `model: DeepSeek V4 Flash` | `model: opencode-go/deepseek-v4-flash` |
-| `subagent.md` | `model: MiMo-V2.5-Pro` | `model: opencode-go/mimo-v2.5-pro` |
+| `subagent.md` | `model: MiMo-V2.5-Pro` | `model: opencode-go/glm-5.1` |
 
 **Cambios adicionales:**
 - Eliminado `opencode.jsonc` — causaba conflictos; el proyecto base no lo usa
 - Modelo del orquestador cambiado de `glm-5.1` a `mimo-v2.5-pro` (consistente con proyecto base)
-- Permisos del orquestador: `edit: allow`, `bash: allow` (como en el proyecto base que funciona)
+- Permisos del orquestador: `edit: deny`, `bash: deny`, `read: allow`, `task: allow`
 - Actualizada documentación (`AGENTS.md`, `README.md`, `context.md`)
 
 ---
@@ -145,13 +163,11 @@ Los modelos **Qwen3.6 Plus** y **Qwen3.5 Plus** están marcados como `deprecated
 | **@validator** | `edit` | ✅ allow | ❌ deny |
 | **@validator** | `bash` | ✅ allow | ❌ deny |
 
-> **Nota:** En v9.0 se revirtieron los permisos del orquestador a `edit: allow`, `bash: allow` para consistencia con el proyecto base (`carbon_footprint_tracker`) que funciona correctamente con esta configuración.
-
 **Permisos finales verificados:**
 
 | Agente | edit | bash | read | task | Modo |
 |--------|:----:|:----:|:----:|:----:|------|
-| **@orchestrator** | ✅ allow | ✅ allow | ✅ allow | ✅ allow | Coordinación — delega y puede ejecutar |
+| **@orchestrator** | ❌ deny | ❌ deny | ✅ allow | ✅ allow | Coordinación — delega a subagentes |
 | **@code-analyst** | ✅ allow | ✅ allow | ✅ allow | ❌ deny | Ejecución — escribe y ejecuta |
 | **@validator** | ❌ deny | ❌ deny | ✅ allow | ❌ deny | Read Only — solo revisa y reporta |
 | **@bulk-processor** | ✅ allow | ✅ allow | ✅ allow | ❌ deny | Ejecución — procesamiento masivo |
@@ -176,7 +192,7 @@ Los modelos **Qwen3.6 Plus** y **Qwen3.5 Plus** están marcados como `deprecated
 - Fix: `plan_manager.py` actualizado con IDs de registro para todos los planes
 - Fix: `_detect_plan()` fallback corregido de `api` a `go`
 - Fix: Bare `except` → `(json.JSONDecodeError, OSError)`
-- Add: `subagent.md`, `main.py`, `cli/`, `opencode.jsonc` al repositorio
+- Add: `subagent.md`, `main.py`, `cli/` al repositorio
 
 ---
 
@@ -184,17 +200,17 @@ Los modelos **Qwen3.6 Plus** y **Qwen3.5 Plus** están marcados como `deprecated
 
 | # | Problema | Archivo | Solución |
 |---|----------|---------|----------|
-| 1 | Orquestador inconsistente: `plan_manager.py` apuntaba a `Qwen3.6 Plus` mientras `orchestrator.md` usaba `GLM-5.1` | `plan_manager.py` | Cambiado a `"orchestrator": "GLM-5.1"` |
+| 1 | Orquestador inconsistente: `plan_manager.py` apuntaba a `Qwen3.6 Plus` | `plan_manager.py` | Cambiado a `opencode-go/mimo-v2.5-pro` |
 | 2 | Validator con permisos de edición/bash pese a ser "Read Only" | `validator.md` | `edit: deny`, `bash: deny` |
-| 3 | `_detect_plan()` retornaba `"api"` si existía `OPENCODE_API_KEY` (necesaria para Go) | `plan_manager.py` | Removida `OPENCODE_API_KEY` del chequeo de API |
+| 3 | `_detect_plan()` retornaba `"api"` si existía `OPENCODE_API_KEY` | `plan_manager.py` | Removida del chequeo; solo `ANTHROPIC_API_KEY` → api |
 | 4 | Bare `except` silenciaba todas las excepciones al leer JSON | `plan_manager.py` | Especificadas `(json.JSONDecodeError, OSError)` |
 | 5 | Comentarios placeholder en `main.py` | `main.py` | Reemplazados por docstrings |
-| 6 | Wizard proponía `Qwen3.6 Plus` como orquestador por defecto | `cli/wizard.py` | Cambiado a `GLM-5.1` |
-| 7 | Agentes usaban nombres de presentación en vez de IDs de registro, causando "modelo no disponible" | `*.md`, `plan_manager.py` | Cambiados a IDs `opencode-go/*` (ej. `opencode-go/mimo-v2.5-pro`) |
-| 8 | Orchestrator tenía `edit: allow` y `bash: allow` pese a ser modo plan (solo lectura + delegación) | `orchestrator.md` | Cambiado a `edit: deny`, `bash: deny` — solo `read + task` |
-| 9 | Validator tenía `edit: allow` y `bash: allow` pese a ser "Read Only" | `validator.md` | Cambiado a `edit: deny`, `bash: deny` |
-| 10 | `opencode.jsonc` causaba conflictos de configuración | `opencode.jsonc` | Eliminado — el proyecto base no lo usa |
-| 11 | Modelo del orquestador `glm-5.1` inconsistente con proyecto base | `orchestrator.md` | Cambiado a `opencode-go/mimo-v2.5-pro` |
+| 6 | Wizard proponía `Qwen3.6 Plus` como orquestador | `cli/wizard.py` | Cambiado a `opencode-go/mimo-v2.5-pro` |
+| 7 | Agentes usaban nombres de presentación en vez de IDs de registro | `*.md`, `plan_manager.py` | Cambiados a IDs `opencode-go/*` |
+| 8 | Orchestrator tenía `edit/bash: allow` pese a ser modo plan | `orchestrator.md` | Cambiado a `deny` — solo `read + task` |
+| 9 | Validator tenía `edit/bash: allow` pese a ser "Read Only" | `validator.md` | Cambiado a `deny` |
+| 10 | `opencode.jsonc` causaba conflictos de configuración | `opencode.jsonc` | Eliminado |
+| 11 | Modelo del orquestador inconsistente con proyecto base | `orchestrator.md` | Cambiado a `opencode-go/mimo-v2.5-pro` |
 
 ---
 
@@ -240,6 +256,9 @@ print(f"Modelos disponibles: {pm.get_available_models()}")
 | **Zen** | `GITHUB_TOKEN` o `COPILOT_TOKEN` | `opencode/claude-sonnet-4.5` |
 | **API** | `ANTHROPIC_API_KEY` | `anthropic/claude-sonnet-4` (configurable) |
 | **Enterprise** | `OPENCODE_PLAN=enterprise` | `opencode-go/mimo-v2.5-pro` (configurable) |
+| **OpenRouter** | `OPENROUTER_API_KEY` | `openrouter/anthropic/claude-sonnet-4.5` (configurable) |
+| **Copilot** | GitHub Copilot activo | `copilot/claude-sonnet-4` |
+| **Ollama** | `OLLAMA_HOST` o Ollama corriendo | `ollama/llama3.3:70b` (configurable) |
 
 ---
 
