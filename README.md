@@ -61,8 +61,10 @@ Los modelos **Qwen3.6 Plus** y **Qwen3.5 Plus** están marcados como `deprecated
 
 ### Uso directo desde este repositorio
 
-```powershell
-cd C:\Users\ekrde\OneDrive\ML2025\Investigacion\agentes
+```bash
+# Clonar el repositorio
+git clone https://github.com/visualiaconsulting/multi-agentes-opencode.git
+cd multi-agentes-opencode
 opencode --agent orchestrator
 ```
 
@@ -160,10 +162,10 @@ print(f"Modelos disponibles: {pm.get_available_models()}")
 
 | Plan | Método de Detección | Modelo Orquestador |
 |------|---------------------|--------------------|
-| **Go** (defecto) | Por omisión o `OPENCODE_PLAN=go` | `GLM-5.1` |
-| **Zen** | `GITHUB_TOKEN` o `COPILOT_TOKEN` | `Claude Sonnet 4.5` |
+| **Go** (defecto) | Por omisión o `OPENCODE_PLAN=go` | `opencode-go/glm-5.1` |
+| **Zen** | `GITHUB_TOKEN` o `COPILOT_TOKEN` | `opencode/claude-sonnet-4.5` |
 | **API** | `ANTHROPIC_API_KEY` | `anthropic/claude-sonnet-4` (configurable) |
-| **Enterprise** | `OPENCODE_PLAN=enterprise` | `MiMo-V2.5-Pro` (configurable) |
+| **Enterprise** | `OPENCODE_PLAN=enterprise` | `opencode-go/mimo-v2.5-pro` (configurable) |
 
 ---
 
