@@ -1,6 +1,6 @@
 # config/plan_manager.py
 """
-Plan Manager — Detecta el plan OpenCode y adapta configuración de agentes
+Plan Manager — Detects the active OpenCode plan and adapts agent configuration
 """
 import os
 import json
@@ -8,8 +8,8 @@ from pathlib import Path
 from typing import Dict, Optional
 
 class PlanManager:
-    # Mapeo de planes a modelos disponibles por rol
-    # Usando IDs de registro (provider/model-id) que OpenCode reconoce
+    # Plan-to-model mapping by role
+    # Using registry IDs (provider/model-id) that OpenCode recognizes
     PLAN_MODELS = {
         "go": {
             "orchestrator": "opencode-go/mimo-v2.5-pro",
@@ -90,7 +90,7 @@ class PlanManager:
         }
     }
     
-    # Límites aproximados por plan (para monitoreo)
+    # Approximate limits per plan (for monitoring)
     PLAN_LIMITS = {
         "go": {"daily": 5000, "weekly": 25000, "monthly": 100000},
         "zen": {"daily": 2000, "weekly": 10000, "monthly": 40000},
@@ -107,12 +107,12 @@ class PlanManager:
         self.limits = self.PLAN_LIMITS.get(self.plan, self.PLAN_LIMITS["go"])
     
     def _detect_plan(self) -> str:
-        """Detecta automáticamente el plan basado en entorno/config"""
-        # 1. Variable de entorno explícita
+        """Automatically detects the plan based on environment/config"""
+        # 1. Explicit environment variable
         if env_plan := os.getenv("OPENCODE_PLAN"):
             return env_plan.lower()
         
-        # 2. Archivo de configuración local
+        # 2. Local configuration file
         config_path = Path(".opencode/plan.json")
         if config_path.exists():
             try:
@@ -121,36 +121,36 @@ class PlanManager:
             except (json.JSONDecodeError, OSError):
                 pass
         
-        # 3. Detectar por variables de API key (Go usa OPENCODE_API_KEY)
+        # 3. Detect by API key variables (Go uses OPENCODE_API_KEY)
         if os.getenv("ANTHROPIC_API_KEY"):
             return "api"
         
-        # 4. Detectar GitHub Copilot (Zen)
+        # 4. Detect GitHub Copilot (Zen)
         if os.getenv("GITHUB_TOKEN") or os.getenv("COPILOT_TOKEN"):
             return "zen"
         
-        # 5. Detectar OpenRouter
+        # 5. Detect OpenRouter
         if os.getenv("OPENROUTER_API_KEY"):
             return "openrouter"
 
-        # 6. Detectar Ollama (local)
+        # 6. Detect Ollama (local)
         if os.getenv("OLLAMA_HOST"):
             return "ollama"
         
         return "go"
 
     def get_available_models(self) -> list:
-        """Retorna una lista de nombres de modelos disponibles para el plan actual"""
+        """Returns a list of available model names for the current plan"""
         if "all_available" in self.models:
             return self.models["all_available"]
         return list(set(self.models.values()))
 
     def get_model(self, role: str) -> str:
-        """Obtiene el modelo para un rol, con fallback si no está disponible"""
+        """Gets the model for a role, with fallback if not available"""
         return self.models.get(role, self.models.get("fallback"))
     
     def generate_config_snippet(self) -> Dict:
-        """Genera snippet de configuración para opencode.json"""
+        """Generates a configuration snippet for opencode.json"""
         return {
             "plan": self.plan,
             "models": {role: self.get_model(role) for role in ["orchestrator", "code-analyst", "validator", "bulk-processor"]},

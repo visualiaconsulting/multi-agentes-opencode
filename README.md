@@ -188,6 +188,12 @@ oh-my-agents/
 
 ## 📝 Changelog
 
+### v0.9.2.3 — Full English Translation (April 2026)
+
+- Translated all documentation and code comments from Spanish to English
+- Agent definitions, context.md, AGENTS.md, main.py, wizard.py, ui.py, plan_manager.py
+- Goal: broader global reach for the project
+
 ### v0.9.2.1 — Subagent Model Fix + Multi-Plan Support (April 2026)
 
 - Subagent model changed from `mimo-v2.5-pro` to `glm-5.1` (no more duplicates)

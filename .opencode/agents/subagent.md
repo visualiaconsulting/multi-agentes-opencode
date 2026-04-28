@@ -1,6 +1,6 @@
 ---
 name: subagent
-description: Agente de reserva y tareas genéricas
+description: Fallback agent and generic tasks
 mode: subagent
 model: opencode-go/glm-5.1
 temperature: 0.2
@@ -11,4 +11,4 @@ permission:
   task: deny
 ---
 
-Agente de reserva y tareas genéricas. Tu objetivo es cumplir con las peticiones del usuario de manera eficiente.
+Fallback agent and generic tasks. Your goal is to fulfill user requests efficiently.

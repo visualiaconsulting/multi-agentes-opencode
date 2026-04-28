@@ -18,62 +18,62 @@ class SetupWizard:
         return len(list(AGENT_DIR.glob("*.md"))) > 0
 
     def run(self):
-        print_step("Bienvenido al Asistente de Configuración de Agentes")
+        print_step("Welcome to the Agent Setup Wizard")
         
-        # Proponer configuración por defecto
+        # Propose default configuration
         self.propose_defaults()
         
         accept = questionary.select(
-            "¿Cómo deseas proceder?",
+            "How would you like to proceed?",
             choices=[
-                {"name": "Aceptar configuración por defecto", "value": "default"},
-                {"name": "Configurar cada agente manualmente", "value": "manual"}
+                {"name": "Accept default configuration", "value": "default"},
+                {"name": "Configure each agent manually", "value": "manual"}
             ]
         ).ask()
 
         if accept == "default":
             self.setup_defaults()
         else:
-            # Limpiar por si acaso
+            # Reset just in case
             self.agents = []
-            # 1. Definir Orquestador
+            # 1. Define Orchestrator
             self.setup_agent(role="orchestrator", is_primary=True)
             
-            # 2. Definir Subagentes
+            # 2. Define Subagents
             add_more = True
             while add_more:
                 self.setup_agent(role="subagent")
-                add_more = questionary.confirm("¿Quieres añadir otro subagente?", default=True).ask()
+                add_more = questionary.confirm("Do you want to add another subagent?", default=True).ask()
         
         self.save_all()
-        print_success("Configuración completada con éxito.")
+        print_success("Configuration completed successfully.")
 
     def propose_defaults(self):
-        """Muestra la tabla de lo que se va a configurar por defecto"""
+        """Show the table of what will be configured by default"""
         from rich.table import Table
-        table = Table(title="Configuración Sugerida (Plan Go)", border_style="accent")
-        table.add_column("Agente", style="cyan")
-        table.add_column("Modelo", style="white")
-        table.add_column("Rol", style="dim")
+        table = Table(title="Suggested Configuration (Go Plan)", border_style="accent")
+        table.add_column("Agent", style="cyan")
+        table.add_column("Model", style="white")
+        table.add_column("Role", style="dim")
 
         table.add_row("orchestrator", "opencode-go/mimo-v2.5-pro", "Primary")
         table.add_row("code-analyst", "opencode-go/deepseek-v4-pro", "Subagent")
         table.add_row("validator", "opencode-go/kimi-k2.6", "Subagent")
         table.add_row("bulk-processor", "opencode-go/deepseek-v4-flash", "Subagent")
-        table.add_row("subagent", "opencode-go/glm-5.1", "Reserva")
+        table.add_row("subagent", "opencode-go/glm-5.1", "Fallback")
         table.add_row("fallback", "opencode-go/minimax-m2.5", "Speed/Recovery")
         
         console.print(table)
 
     def setup_defaults(self):
-        """Configura los agentes recomendados automáticamente"""
+        """Automatically configure the recommended agents"""
         self.agents = [] # Reset
         defaults = [
-            {"name": "orchestrator", "role": "primary", "model": "opencode-go/mimo-v2.5-pro", "desc": "Orquestador central del sistema"},
-            {"name": "code-analyst", "role": "subagent", "model": "opencode-go/deepseek-v4-pro", "desc": "Ingeniero de software senior"},
-            {"name": "validator", "role": "subagent", "model": "opencode-go/kimi-k2.6", "desc": "QA y validador de código"},
-            {"name": "bulk-processor", "role": "subagent", "model": "opencode-go/deepseek-v4-flash", "desc": "Procesamiento masivo de datos"},
-            {"name": "subagent", "role": "subagent", "model": "opencode-go/glm-5.1", "desc": "Agente de reserva y tareas genéricas"}
+            {"name": "orchestrator", "role": "primary", "model": "opencode-go/mimo-v2.5-pro", "desc": "Central system orchestrator"},
+            {"name": "code-analyst", "role": "subagent", "model": "opencode-go/deepseek-v4-pro", "desc": "Senior software engineer"},
+            {"name": "validator", "role": "subagent", "model": "opencode-go/kimi-k2.6", "desc": "QA and code validator"},
+            {"name": "bulk-processor", "role": "subagent", "model": "opencode-go/deepseek-v4-flash", "desc": "Bulk data processing"},
+            {"name": "subagent", "role": "subagent", "model": "opencode-go/glm-5.1", "desc": "Fallback agent and generic tasks"}
         ]
 
         permissions_map = {
@@ -97,26 +97,26 @@ class SetupWizard:
             self.agents.append(agent_config)
 
     def setup_agent(self, role="subagent", is_primary=False):
-        console.print(f"\n[bold accent]Configurando {'Orquestador' if is_primary else 'Subagente'}[/bold accent]")
+        console.print(f"\n[bold accent]Configuring {'Orchestrator' if is_primary else 'Subagent'}[/bold accent]")
         
         default_name = "@orchestrator" if is_primary else "@subagent"
-        name = questionary.text("Nombre del agente:", default=default_name).ask()
+        name = questionary.text("Agent name:", default=default_name).ask()
         
-        description = questionary.text("Descripción corta del rol:").ask()
+        description = questionary.text("Short role description:").ask()
         
-        # Selección de modelo con flechas
+        # Model selection with arrows
         available_models = self.pm.get_available_models()
         default_model = self.pm.get_model("orchestrator" if is_primary else "code-analyst")
         
         model = questionary.select(
-            f"Seleccione un modelo para el plan '{self.pm.plan}':",
+            f"Select a model for plan '{self.pm.plan}':",
             choices=available_models,
             default=default_model
         ).ask()
         
-        # Permisos con confirmación elegante
-        allow_edit = questionary.confirm("¿Permitir edición de archivos?", default=True).ask()
-        allow_bash = questionary.confirm("¿Permitir ejecución de comandos bash?", default=True).ask()
+        # Permissions with elegant confirmation
+        allow_edit = questionary.confirm("Allow file editing?", default=True).ask()
+        allow_bash = questionary.confirm("Allow bash command execution?", default=True).ask()
         
         agent_config = {
             "name": name.replace("@", ""),
@@ -154,5 +154,5 @@ permission:
   task: {agent['permissions']['task']}
 ---
 
-{agent['description']}. Tu objetivo es cumplir con las peticiones del usuario de manera eficiente.
+{agent['description']}. Your goal is to fulfill user requests efficiently.
 """

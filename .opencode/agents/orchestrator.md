@@ -1,6 +1,6 @@
 ---
 name: orchestrator
-description: Orquestador central del sistema
+description: Central system orchestrator
 mode: primary
 model: opencode-go/mimo-v2.5-pro
 temperature: 0.2
@@ -11,4 +11,4 @@ permission:
   task: allow
 ---
 
-Orquestador central del sistema. Tu objetivo es cumplir con las peticiones del usuario de manera eficiente.
+Central system orchestrator. Your goal is to fulfill user requests efficiently.

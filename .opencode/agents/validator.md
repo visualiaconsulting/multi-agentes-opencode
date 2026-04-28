@@ -1,6 +1,6 @@
 ---
 name: validator
-description: QA y validador de código
+description: QA and code validator
 mode: subagent
 model: opencode-go/kimi-k2.6
 temperature: 0.2
@@ -11,4 +11,4 @@ permission:
   task: deny
 ---
 
-QA y validador de código. Tu objetivo es cumplir con las peticiones del usuario de manera eficiente.
+QA and code validator. Your goal is to fulfill user requests efficiently.

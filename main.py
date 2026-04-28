@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 def check_dependencies():
-    """Verifica que las dependencias estén instaladas"""
+    """Check that dependencies are installed"""
     missing = []
     try:
         import yaml
@@ -22,17 +22,17 @@ def check_dependencies():
 
 
 def check_opencode_cli():
-    """Verifica que OpenCode CLI esté disponible"""
+    """Check that OpenCode CLI is available"""
     import shutil
     return shutil.which("opencode") is not None
 
 
 def run_doctor():
-    """Diagnostica problemas del entorno"""
+    """Diagnose environment issues"""
     import platform
     from cli.ui import console
 
-    console.print("\n[bold cyan]=== Diagnóstico del Sistema ===[/bold cyan]\n")
+    console.print("\n[bold cyan]=== System Diagnostics ===[/bold cyan]\n")
 
     # Python
     py_ver = platform.python_version()
@@ -40,36 +40,36 @@ def run_doctor():
     if major >= 3 and minor >= 8:
         console.print(f"  [green]✔[/green] Python {py_ver}")
     else:
-        console.print(f"  [red]✖[/red] Python {py_ver} (se requiere 3.8+)")
+        console.print(f"  [red]✖[/red] Python {py_ver} (requires 3.8+)")
 
-    # Dependencias
+    # Dependencies
     missing = check_dependencies()
     if missing:
-        console.print(f"  [red]✖[/red] Dependencias faltantes: {', '.join(missing)}")
-        console.print(f"    Ejecuta: [bold]pip install -r requirements.txt[/bold]")
+        console.print(f"  [red]✖[/red] Missing dependencies: {', '.join(missing)}")
+        console.print(f"    Run: [bold]pip install -r requirements.txt[/bold]")
     else:
-        console.print(f"  [green]✔[/green] Dependencias instaladas (PyYAML, questionary, rich)")
+        console.print(f"  [green]✔[/green] Dependencies installed (PyYAML, questionary, rich)")
 
     # OpenCode CLI
     if check_opencode_cli():
-        console.print(f"  [green]✔[/green] OpenCode CLI disponible")
+        console.print(f"  [green]✔[/green] OpenCode CLI available")
     else:
-        console.print(f"  [yellow]⚠[/yellow] OpenCode CLI no encontrado")
-        console.print(f"    Instala desde: [bold]https://opencode.ai[/bold]")
+        console.print(f"  [yellow]⚠[/yellow] OpenCode CLI not found")
+        console.print(f"    Install from: [bold]https://opencode.ai[/bold]")
 
-    # Agentes
+    # Agents
     agent_dir = Path(".opencode/agents")
     if agent_dir.exists():
         agent_count = len(list(agent_dir.glob("*.md")))
-        console.print(f"  [green]✔[/green] Agentes configurados: {agent_count}")
+        console.print(f"  [green]✔[/green] Agents configured: {agent_count}")
     else:
-        console.print(f"  [yellow]⚠[/yellow] No hay directorio .opencode/agents/")
+        console.print(f"  [yellow]⚠[/yellow] No .opencode/agents/ directory found")
 
     console.print("\n[bold cyan]==============================[/bold cyan]\n")
 
 
 def load_agents():
-    """Carga las definiciones de agentes desde .opencode/agents/*.md"""
+    """Load agent definitions from .opencode/agents/*.md"""
     import yaml
     agent_dir = Path(".opencode/agents")
     agents = []
@@ -97,21 +97,21 @@ def load_agents():
 
 def main():
     parser = argparse.ArgumentParser(description="oh-my-agents — Multi-Agent Orchestration for OpenCode")
-    parser.add_argument("--setup", action="store_true", help="Forzar la configuración inicial de agentes")
-    parser.add_argument("--doctor", action="store_true", help="Diagnosticar problemas del entorno")
+    parser.add_argument("--setup", action="store_true", help="Force initial agent configuration")
+    parser.add_argument("--doctor", action="store_true", help="Diagnose environment issues")
     args = parser.parse_args()
 
-    # Verificar dependencias básicas
+    # Check basic dependencies
     missing = check_dependencies()
     if missing:
-        print(f"\n  ERROR: Dependencias faltantes: {', '.join(missing)}")
-        print(f"  Ejecuta: pip install -r requirements.txt\n")
+        print(f"\n  ERROR: Missing dependencies: {', '.join(missing)}")
+        print(f"  Run: pip install -r requirements.txt\n")
         sys.exit(1)
 
     from cli.ui import print_header, print_agent_status, console
     from cli.wizard import SetupWizard
 
-    # Modo doctor
+    # Doctor mode
     if args.doctor:
         run_doctor()
         return
@@ -120,33 +120,33 @@ def main():
 
     wizard = SetupWizard()
 
-    # Verificar si hay configuración existente
+    # Check for existing configuration
     if args.setup or not wizard.check_existing_config():
         if args.setup:
-            console.print("[yellow]Modo de reconfiguración forzado...[/yellow]\n")
+            console.print("[yellow]Forced reconfiguration mode...[/yellow]\n")
         else:
-            console.print("[yellow]No se detectó configuración previa de agentes.[/yellow]\n")
+            console.print("[yellow]No previous agent configuration detected.[/yellow]\n")
 
-        # Preguntar al usuario antes de ejecutar el wizard
+        # Ask user before running the wizard
         import questionary
         run_wizard = questionary.confirm(
-            "¿Desea ejecutar el asistente de configuración?",
+            "Do you want to run the setup wizard?",
             default=True
         ).ask()
 
         if run_wizard:
             wizard.run()
         else:
-            console.print("\n[dim]Puedes ejecutar el asistente más tarde con: python main.py --setup[/dim]")
+            console.print("\n[dim]You can run the wizard later with: python main.py --setup[/dim]")
             return
 
     agents = load_agents()
 
     if agents:
         print_agent_status(agents)
-        console.print("\n[bold green]Sistema listo.[/bold green] Usa `opencode --agent orchestrator` para empezar.")
+        console.print("\n[bold green]System ready.[/bold green] Use `opencode --agent orchestrator` to get started.")
     else:
-        console.print("[red]Error: No se pudieron cargar los agentes.[/red]")
+        console.print("[red]Error: Could not load agents.[/red]")
 
 
 if __name__ == "__main__":
@@ -154,5 +154,5 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         from cli.ui import console
-        console.print("\n[yellow]Operación cancelada por el usuario.[/yellow]")
+        console.print("\n[yellow]Operation cancelled by user.[/yellow]")
         sys.exit(0)

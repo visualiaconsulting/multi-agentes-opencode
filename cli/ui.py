@@ -5,7 +5,7 @@ from rich.text import Text
 from rich.theme import Theme
 from rich.align import Align
 
-# Tema personalizado para elegancia
+# Custom theme for elegance
 custom_theme = Theme({
     "info": "cyan",
     "warning": "yellow",
@@ -44,18 +44,18 @@ def print_header():
     console.print(panel)
 
 def print_agent_status(agents_data):
-    table = Table(title="Agentes Activos", border_style="dim")
-    table.add_column("Agente", style="accent")
-    table.add_column("Rol", style="info")
-    table.add_column("Modelo", style="white")
-    table.add_column("Estado", justify="center")
+    table = Table(title="Active Agents", border_style="dim")
+    table.add_column("Agent", style="accent")
+    table.add_column("Role", style="info")
+    table.add_column("Model", style="white")
+    table.add_column("Status", justify="center")
 
     for agent in agents_data:
         table.add_row(
             agent['name'],
             agent['role'],
             agent['model'],
-            "[bold green]● Activo[/bold green]"
+            "[bold green]● Active[/bold green]"
         )
     
     console.print(table)
