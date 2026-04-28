@@ -1,5 +1,5 @@
 ---
-project: Multi-Agent System Template
+project: oh-my-agents
 plan: go
 version: 1.0
 ---

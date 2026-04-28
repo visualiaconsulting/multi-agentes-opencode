@@ -28,13 +28,18 @@ def print_header():
     """
     console.print(Align.center(f"[accent]{ascii_art}[/accent]"))
     
-    header_text = Text("MULTI-AGENT ORCHESTRATION SYSTEM", style="info")
+    title = Text("🤖 oh-my-agents", style="bold cyan")
+    subtitle = Text("Multi-Agent Orchestration Framework", style="dim")
+    credit = Text("A product of VisualIA Consulting · Licensed under MIT", style="dim italic")
+    
+    panel_content = Align.center(
+        Text.assemble(title, "\n", subtitle, "\n\n", credit)
+    )
+    
     panel = Panel(
-        Align.center(header_text),
+        panel_content,
         border_style="dim",
-        padding=(0, 2),
-        subtitle="[bold]OP EN CO DE[/bold]",
-        subtitle_align="center"
+        padding=(1, 2),
     )
     console.print(panel)
 

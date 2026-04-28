@@ -96,7 +96,7 @@ def load_agents():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Multi-Agent CLI")
+    parser = argparse.ArgumentParser(description="oh-my-agents — Multi-Agent Orchestration for OpenCode")
     parser.add_argument("--setup", action="store_true", help="Forzar la configuración inicial de agentes")
     parser.add_argument("--doctor", action="store_true", help="Diagnosticar problemas del entorno")
     args = parser.parse_args()

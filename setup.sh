@@ -1,10 +1,10 @@
 #!/bin/bash
-# setup.sh — Bootstrap para Linux/Mac
-# Multi-Agentes OpenCode (Plan Go)
+# setup.sh — Bootstrap for Linux/Mac
+# oh-my-agents — OpenCode Multi-Agent Framework
 
 echo ""
 echo "========================================"
-echo "  Multi-Agentes OpenCode — Setup"
+echo "  oh-my-agents — Setup"
 echo "========================================"
 echo ""
 

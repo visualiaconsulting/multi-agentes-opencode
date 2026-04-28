@@ -1,9 +1,9 @@
-# setup.ps1 — Bootstrap para Windows
-# Multi-Agentes OpenCode (Plan Go)
+# setup.ps1 — Bootstrap for Windows
+# oh-my-agents — OpenCode Multi-Agent Framework
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  Multi-Agentes OpenCode — Setup" -ForegroundColor Cyan
+Write-Host "  oh-my-agents — Setup" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
