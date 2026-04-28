@@ -24,7 +24,7 @@ El proyecto implementa una arquitectura de **Orquestador y Especialistas** sobre
 | **@code-analyst** | Ingeniero Senior | `opencode-go/deepseek-v4-pro` | `Edit, Bash, Read` | Implementación de código limpio y arquitectura. |
 | **@validator** | Especialista QA | `opencode-go/kimi-k2.6` | `Read Only` | Validación, linting y revisión de calidad. Sin edición ni bash. |
 | **@bulk-processor** | Procesador de Datos | `opencode-go/deepseek-v4-flash` | `Edit, Bash, Read` | Tareas repetitivas y de gran volumen (oculto). |
-| **@subagent** | Depurador/Reserva | `opencode-go/mimo-v2.5-pro` | `Edit, Bash, Read` | Agente genérico para depuración y tareas auxiliares. |
+| **@subagent** | Depurador/Reserva | `opencode-go/qwen3.6-plus` | `Edit, Bash, Read` | Agente genérico para depuración y tareas auxiliares. |
 
 ### 🔍 Detalle de Permisos por Agente
 
@@ -103,7 +103,7 @@ Los modelos **Qwen3.6 Plus** y **Qwen3.5 Plus** están marcados como `deprecated
 | `code-analyst.md` | `model: DeepSeek V4 Pro` | `model: opencode-go/deepseek-v4-pro` |
 | `validator.md` | `model: Kimi K2.6` | `model: opencode-go/kimi-k2.6` |
 | `bulk-processor.md` | `model: DeepSeek V4 Flash` | `model: opencode-go/deepseek-v4-flash` |
-| `subagent.md` | `model: MiMo-V2.5-Pro` | `model: opencode-go/mimo-v2.5-pro` |
+| `subagent.md` | `model: MiMo-V2.5-Pro` | `model: opencode-go/qwen3.6-plus` |
 
 **Cambios adicionales:**
 - Eliminado `opencode.jsonc` — causaba conflictos; el proyecto base no lo usa

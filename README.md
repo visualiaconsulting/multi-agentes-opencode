@@ -12,7 +12,7 @@ Sistema multi-agente para **OpenCode Go** con arquitectura de **Orquestador y Es
 | **@code-analyst** | `deepseek-v4-pro` | Implementación — escribe código limpio | edit, bash, read |
 | **@validator** | `kimi-k2.6` | QA — valida calidad y revisa código | read only |
 | **@bulk-processor** | `deepseek-v4-flash` | Datos masivos — tareas repetitivas (oculto) | edit, bash, read |
-| **@subagent** | `mimo-v2.5-pro` | Depurador — tareas auxiliares y reserva | edit, bash, read |
+| **@subagent** | `qwen3.6-plus` | Depurador — tareas auxiliares y reserva | edit, bash, read |
 
 ---
 
@@ -40,6 +40,8 @@ cd multi-agentes-opencode
 Los modelos **Qwen3.6 Plus** y **Qwen3.5 Plus** están marcados como `deprecated` en el registry de OpenCode.
 
 > **Solución aplicada:** Se cambió el modelo del orquestador a `opencode-go/mimo-v2.5-pro` (igual que el proyecto base que funciona sin errores). Se eliminó `opencode.jsonc` que causaba conflictos.
+>
+> **Nota v9.1.0:** A pesar del issue, el modelo `opencode-go/qwen3.6-plus` se asignó al subagent (@subagent) para eliminar la duplicación con el orchestrator. Si presenta problemas, cambiar a `opencode-go/qwen3.5-plus` o `opencode-go/minimax-m2.5`.
 
 ### Referencia
 - Issue: [#22644](https://github.com/anomalyco/opencode/issues/22644)
@@ -164,6 +166,30 @@ print(f"Modelos disponibles: {pm.get_available_models()}")
 
 ## 📝 Changelog
 
+### v9.1.0 — Eliminación de Modelo Duplicado (Abril 2026)
+
+**Corrección de modelo duplicado:** El modelo `opencode-go/mimo-v2.5-pro` estaba asignado tanto al orchestrator como al subagent, generando redundancia. Se cambió el modelo del subagent a `opencode-go/qwen3.6-plus` para aprovechar la diversidad de modelos disponibles.
+
+| Archivo | Antes | Después |
+|---------|-------|---------|
+| `subagent.md` | `model: opencode-go/mimo-v2.5-pro` | `model: opencode-go/qwen3.6-plus` |
+
+**Archivos actualizados:**
+- `.opencode/agents/subagent.md` — modelo del agente
+- `.opencode/CONTEXT.md` — referencia de modelos
+- `AGENTS.md` — tabla de agentes y changelog
+- `README.md` — tabla de agentes y changelog
+
+**Modelos finales (sin duplicados):**
+
+| Agente | Modelo |
+|--------|--------|
+| @orchestrator | `opencode-go/mimo-v2.5-pro` |
+| @code-analyst | `opencode-go/deepseek-v4-pro` |
+| @validator | `opencode-go/kimi-k2.6` |
+| @bulk-processor | `opencode-go/deepseek-v4-flash` |
+| @subagent | `opencode-go/qwen3.6-plus` |
+
 ### v9.0 — Sincronización con Proyecto Base (Abril 2026)
 
 **Corrección crítica de modelos:** Los archivos `.opencode/agents/*.md` usaban nombres de presentación en vez de IDs de registro, causando `ProviderModelNotFoundError`.
@@ -174,7 +200,7 @@ print(f"Modelos disponibles: {pm.get_available_models()}")
 | `code-analyst.md` | `model: DeepSeek V4 Pro` | `model: opencode-go/deepseek-v4-pro` |
 | `validator.md` | `model: Kimi K2.6` | `model: opencode-go/kimi-k2.6` |
 | `bulk-processor.md` | `model: DeepSeek V4 Flash` | `model: opencode-go/deepseek-v4-flash` |
-| `subagent.md` | `model: MiMo-V2.5-Pro` | `model: opencode-go/mimo-v2.5-pro` |
+| `subagent.md` | `model: MiMo-V2.5-Pro` | `model: opencode-go/qwen3.6-plus` |
 
 **Cambios adicionales:**
 - Eliminado `opencode.jsonc` — causaba conflictos; el proyecto base no lo usa

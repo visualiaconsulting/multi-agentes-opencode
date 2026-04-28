@@ -5,8 +5,8 @@ mode: primary
 model: opencode-go/mimo-v2.5-pro
 temperature: 0.2
 permission:
-  edit: allow
-  bash: allow
+  edit: deny
+  bash: deny
   read: allow
   task: allow
 ---
