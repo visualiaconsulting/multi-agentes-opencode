@@ -1,15 +1,54 @@
-# Multi-Agentes OpenCode (Plan Go) 🚀
+# Multi-Agentes OpenCode (Plan Go)
 
 Sistema multi-agente para **OpenCode Go** con arquitectura de **Orquestador y Especialistas**. El orquestador analiza tareas complejas, las desglosa y delega a subagentes especializados, validando el resultado final.
 
+---
+
 ## 🤖 Agentes Configurados
 
-| Agente | Modelo | Rol | Permisos |
-|--------|--------|-----|----------|
-| **@orchestrator** | `mimo-v2.5-pro` | Coordinador — divide tareas y delega | full (edit, bash, read, task) |
+| Agente | Modelo (Plan Go) | Rol | Permisos |
+|--------|:----------------:|-----|----------|
+| **@orchestrator** | `glm-5.1` | Coordinador — divide tareas y delega | edit, read, task (sin bash) |
 | **@code-analyst** | `deepseek-v4-pro` | Implementación — escribe código limpio | edit, bash, read |
-| **@validator** | `kimi-k2.6` | QA — valida calidad, solo lectura | read only |
-| **@bulk-processor** | `deepseek-v4-flash` | Datos masivos — tareas repetitivas | edit, bash, read (hidden) |
+| **@validator** | `kimi-k2.6` | QA — valida calidad y ejecuta pruebas | read only |
+| **@bulk-processor** | `deepseek-v4-flash` | Datos masivos — tareas repetitivas (oculto) | edit, bash, read |
+| **@subagent** | `mimo-v2.5-pro` | Depurador — tareas auxiliares y reserva | edit, bash, read |
+
+---
+
+## ⚠️ Issue Conocido: Modelos Qwen Deshabilitados
+
+Los modelos **Qwen3.6 Plus** y **Qwen3.5 Plus** están marcados como `deprecated` en el registry de OpenCode. Para habilitarlos en el plan Go, se incluye `opencode.jsonc` con el workaround que fuerza el status `beta`.
+
+### Solución en opencode.jsonc
+
+```jsonc
+"provider": {
+  "opencode-go": {
+    "models": {
+      "glm-5.1": {
+        "name": "GLM-5.1",
+        "reasoning": true
+      },
+      "qwen3.6-plus": {
+        "name": "Qwen3.6 Plus",
+        "reasoning": true,
+        "status": "beta"
+      },
+      "qwen3.5-plus": {
+        "name": "Qwen3.5 Plus",
+        "reasoning": true,
+        "status": "beta"
+      }
+    }
+  }
+}
+```
+
+> **Nota:** Si el workaround no funciona, cambia el modelo del orquestador a `mimo-v2.5-pro` en `.opencode/agents/orchestrator.md`.
+
+### Referencia
+- Issue: [#22644](https://github.com/anomalyco/opencode/issues/22644)
 
 ---
 
@@ -44,7 +83,7 @@ project: Mi Proyecto
 plan: go
 version: 1.0
 ---
-Contexto del proyecto aquí..." > proyecto\.opencode\context.md
+Contexto del proyecto aquí..." > proyecto\.opencode\CONTEXT.md
 
 # 4. Ejecutar desde el proyecto
 cd proyecto
@@ -53,16 +92,26 @@ opencode --agent orchestrator
 
 ---
 
-## 📁 Estructura
+## 📁 Estructura del Proyecto
 
 ```
-.opencode/
-├── context.md                 # Contexto global del proyecto
-└── agents/
-    ├── orchestrator.md        # Coordinador principal
-    ├── code-analyst.md        # Implementación de código
-    ├── validator.md           # QA y validación
-    └── bulk-processor.md      # Procesamiento masivo (hidden)
+./
+├── AGENTS.md                    # Estado detallado de agentes
+├── README.md                    # Este documento
+├── opencode.jsonc               # Configuración global de OpenCode
+├── plan_manager.py              # Lógica de selección de modelos
+├── main.py                      # CLI del sistema multi-agente
+├── cli/
+│   ├── wizard.py                # Asistente de configuración interactivo
+│   └── ui.py                    # Componentes visuales (rich)
+└── .opencode/
+    ├── CONTEXT.md               # Contexto global inyectado a todos los agentes
+    └── agents/
+        ├── orchestrator.md      # Coordinador principal
+        ├── code-analyst.md      # Ingeniero de software senior
+        ├── validator.md         # QA y validación de código
+        ├── bulk-processor.md    # Procesamiento masivo (oculto)
+        └── subagent.md          # Depurador / agente de reserva
 ```
 
 ---
@@ -96,13 +145,38 @@ El orquestador:
 
 ## 🔧 plan_manager.py
 
-Utilidad para detectar automáticamente el plan de OpenCode activo (go, zen, api, enterprise) y seleccionar los modelos adecuados para cada rol. Soporta override por variables de entorno.
+Utilidad para detectar automáticamente el plan de OpenCode activo (`go`, `zen`, `api`, `enterprise`) y seleccionar los modelos adecuados para cada rol. Soporta override por variables de entorno.
 
 ```python
 from plan_manager import PlanManager
+
 pm = PlanManager()
-print(pm.get_model("orchestrator"))  # Modelo según plan detectado
+print(f"Plan detectado: {pm.plan}")
+print(f"Modelo orquestador: {pm.get_model('orchestrator')}")
+print(f"Modelos disponibles: {pm.get_available_models()}")
 ```
+
+### Planes Soportados
+
+| Plan | Método de Detección | Modelo Orquestador |
+|------|---------------------|--------------------|
+| **Go** (defecto) | Por omisión o `OPENCODE_PLAN=go` | `GLM-5.1` |
+| **Zen** | `GITHUB_TOKEN` o `COPILOT_TOKEN` | `Claude Sonnet 4.5` |
+| **API** | `ANTHROPIC_API_KEY` | `anthropic/claude-sonnet-4` (configurable) |
+| **Enterprise** | `OPENCODE_PLAN=enterprise` | `MiMo-V2.5-Pro` (configurable) |
+
+---
+
+## 🐛 Correcciones Recientes (Abril 2026)
+
+| # | Problema | Solución |
+|---|----------|----------|
+| 1 | Orquestador apuntaba a `Qwen3.6 Plus` en vez de `GLM-5.1` | Sincronizado a `GLM-5.1` en `plan_manager.py` |
+| 2 | Validator tenía permisos de edición/bash pese a ser "Read Only" | Permisos corregidos a `edit: deny`, `bash: deny` |
+| 3 | `_detect_plan()` detectaba `api` erróneamente con `OPENCODE_API_KEY` | Removida del chequeo; solo `ANTHROPIC_API_KEY` → api |
+| 4 | Bare `except` silenciaba errores al leer JSON | Especificadas excepciones concretas |
+| 5 | Comentarios placeholder en `main.py` | Reemplazados por docstrings |
+| 6 | Wizard proponía `Qwen3.6 Plus` como orquestador | Cambiado a `GLM-5.1` |
 
 ---
 

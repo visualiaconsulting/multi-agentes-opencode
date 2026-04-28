@@ -9,20 +9,44 @@ from typing import Dict, Optional
 
 class PlanManager:
     # Mapeo de planes a modelos disponibles por rol
+    # Usando IDs de registro (provider/model-id) que OpenCode reconoce
     PLAN_MODELS = {
         "go": {
-            "orchestrator": "mimo/MiMo-V2.5-Pro",
-            "code-analyst": "deepseek/DeepSeek-V4-Pro", 
-            "validator": "moonshot/Kimi-K2.6",
-            "bulk-processor": "deepseek/DeepSeek-V4-Flash",
-            "fallback": "qwen/Qwen3.5-Plus"  # Si algún modelo falla
+            "orchestrator": "opencode-go/glm-5.1",
+            "code-analyst": "opencode-go/deepseek-v4-pro",
+            "validator": "opencode-go/kimi-k2.6",
+            "bulk-processor": "opencode-go/deepseek-v4-flash",
+            "fallback": "opencode-go/minimax-m2.5",
+            "all_available": [
+                "opencode-go/glm-5", "opencode-go/glm-5.1",
+                "opencode-go/kimi-k2.5", "opencode-go/kimi-k2.6",
+                "opencode-go/mimo-v2-pro", "opencode-go/mimo-v2-omni",
+                "opencode-go/mimo-v2.5-pro", "opencode-go/mimo-v2.5",
+                "opencode-go/minimax-m2.5", "opencode-go/minimax-m2.7",
+                "opencode-go/qwen3.5-plus", "opencode-go/qwen3.6-plus",
+                "opencode-go/deepseek-v4-pro", "opencode-go/deepseek-v4-flash"
+            ]
         },
         "zen": {
-            "orchestrator": "github/copilot-chat",  # o "anthropic/claude-sonnet-4"
-            "code-analyst": "github/copilot-code",
-            "validator": "anthropic/claude-haiku-3",
-            "bulk-processor": "deepseek/DeepSeek-V4-Flash",  # requiere API key
-            "fallback": "openai/gpt-4o-mini"
+            "orchestrator": "opencode/claude-sonnet-4.5",
+            "code-analyst": "opencode/gpt-5.1-codex",
+            "validator": "opencode/claude-haiku-4.5",
+            "bulk-processor": "opencode/gemini-3-flash",
+            "fallback": "opencode/gpt-5.4-mini",
+            "all_available": [
+                "opencode/big-pickle",
+                "opencode/minimax-m2.5-free", "opencode/minimax-m2.5",
+                "opencode/claude-haiku-4.5", "opencode/claude-opus-4.5",
+                "opencode/claude-sonnet-4.5",
+                "opencode/gpt-5.1-codex", "opencode/gpt-5.4-mini",
+                "opencode/gemini-3-flash",
+                "opencode-go/glm-5", "opencode-go/glm-5.1",
+                "opencode/hy3-preview-free",
+                "opencode-go/kimi-k2.5", "opencode-go/kimi-k2.6",
+                "opencode/ling-2.6-flash-free",
+                "opencode/nemotron-3-super-free",
+                "opencode-go/qwen3.5-plus", "opencode-go/qwen3.6-plus"
+            ]
         },
         "api": {
             "orchestrator": os.getenv("ORCHESTRATOR_MODEL", "anthropic/claude-sonnet-4"),
@@ -32,11 +56,11 @@ class PlanManager:
             "fallback": os.getenv("FALLBACK_MODEL", "openai/gpt-4o-mini")
         },
         "enterprise": {
-            "orchestrator": os.getenv("ENT_ORCHESTRATOR", "mimo/MiMo-V2.5-Pro"),
-            "code-analyst": os.getenv("ENT_ANALYST", "deepseek/DeepSeek-V4-Pro"),
-            "validator": os.getenv("ENT_VALIDATOR", "moonshot/Kimi-K2.6"),
-            "bulk-processor": os.getenv("ENT_BULK", "deepseek/DeepSeek-V4-Flash"),
-            "fallback": os.getenv("ENT_FALLBACK", "qwen/Qwen3.5-Plus")
+            "orchestrator": os.getenv("ENT_ORCHESTRATOR", "opencode-go/mimo-v2.5-pro"),
+            "code-analyst": os.getenv("ENT_ANALYST", "opencode-go/deepseek-v4-pro"),
+            "validator": os.getenv("ENT_VALIDATOR", "opencode-go/kimi-k2.6"),
+            "bulk-processor": os.getenv("ENT_BULK", "opencode-go/deepseek-v4-flash"),
+            "fallback": os.getenv("ENT_FALLBACK", "opencode-go/qwen3.5-plus")
         }
     }
     
@@ -50,8 +74,8 @@ class PlanManager:
     
     def __init__(self, plan: Optional[str] = None):
         self.plan = plan or self._detect_plan()
-        self.models = self.PLAN_MODELS.get(self.plan, self.PLAN_MODELS["api"])
-        self.limits = self.PLAN_LIMITS.get(self.plan, self.PLAN_LIMITS["api"])
+        self.models = self.PLAN_MODELS.get(self.plan, self.PLAN_MODELS["go"])
+        self.limits = self.PLAN_LIMITS.get(self.plan, self.PLAN_LIMITS["go"])
     
     def _detect_plan(self) -> str:
         """Detecta automáticamente el plan basado en entorno/config"""
@@ -64,45 +88,29 @@ class PlanManager:
         if config_path.exists():
             try:
                 with open(config_path) as f:
-                    return json.load(f).get("plan", "api")
-            except:
+                    return json.load(f).get("plan", "go")
+            except (json.JSONDecodeError, OSError):
                 pass
         
-        # 3. Detectar por variables de API key
-        if os.getenv("OPENCODE_API_KEY") or os.getenv("ANTHROPIC_API_KEY"):
+        # 3. Detectar por variables de API key (Go usa OPENCODE_API_KEY)
+        if os.getenv("ANTHROPIC_API_KEY"):
             return "api"
         
         # 4. Detectar GitHub Copilot (Zen)
         if os.getenv("GITHUB_TOKEN") or os.getenv("COPILOT_TOKEN"):
             return "zen"
         
-        # 5. Default: asumir Go si opencode CLI funciona sin keys
-        try:
-            import subprocess
-            result = subprocess.run(
-                ["opencode", "models", "--json"], 
-                capture_output=True, text=True, timeout=5
-            )
-            if result.returncode == 0 and "mimo" in result.stdout.lower():
-                return "go"
-        except:
-            pass
-        
-        return "api"  # Fallback más seguro
-    
+        return "go"
+
+    def get_available_models(self) -> list:
+        """Retorna una lista de nombres de modelos disponibles para el plan actual"""
+        if "all_available" in self.models:
+            return self.models["all_available"]
+        return list(set(self.models.values()))
+
     def get_model(self, role: str) -> str:
         """Obtiene el modelo para un rol, con fallback si no está disponible"""
-        model = self.models.get(role) or self.models["fallback"]
-        
-        # Si es plan API, validar que haya API key configurada
-        if self.plan == "api" and "provider/" in model:
-            provider = model.split("/")[0]
-            key_var = f"{provider.upper()}_API_KEY".replace("-", "_")
-            if not os.getenv(key_var):
-                print(f"⚠️  Warning: {key_var} no configurada, usando fallback")
-                return self.models["fallback"]
-        
-        return model
+        return self.models.get(role, self.models.get("fallback"))
     
     def generate_config_snippet(self) -> Dict:
         """Genera snippet de configuración para opencode.json"""
