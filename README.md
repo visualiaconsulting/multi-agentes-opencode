@@ -169,6 +169,27 @@ print(f"Modelos disponibles: {pm.get_available_models()}")
 
 ---
 
+## 📝 Changelog
+
+### v8.0.1 — Verificación de Permisos (Abril 2026)
+
+Auditoría de permisos: se eliminaron privilegios excesivos de escritura/ejecución en agentes que no los necesitan.
+
+| Agente | Cambio | Antes | Después |
+|--------|--------|-------|---------|
+| **@orchestrator** | `edit` / `bash` | ✅ allow | ❌ deny |
+| **@validator** | `edit` / `bash` | ✅ allow | ❌ deny |
+
+El orquestador ahora es estrictamente **modo plan** (solo `read + task`), y el validator es **read only** (solo `read`). Toda escritura y ejecución se delega a los subagentes de ejecución.
+
+### v0.8 — IDs de Registro y Correcciones (Abril 2026)
+
+- Fix: Model IDs cambiados de nombres de presentación a IDs de registro (`opencode-go/*`)
+- Fix: Ruta personal eliminada del README
+- Fix: `plan_manager.py` actualizado con IDs de registro para todos los planes
+
+---
+
 ## 🐛 Correcciones Recientes (Abril 2026)
 
 | # | Problema | Solución |
@@ -179,6 +200,9 @@ print(f"Modelos disponibles: {pm.get_available_models()}")
 | 4 | Bare `except` silenciaba errores al leer JSON | Especificadas excepciones concretas |
 | 5 | Comentarios placeholder en `main.py` | Reemplazados por docstrings |
 | 6 | Wizard proponía `Qwen3.6 Plus` como orquestador | Cambiado a `GLM-5.1` |
+| 7 | Agentes usaban nombres de presentación en vez de IDs de registro | Cambiados a `opencode-go/*` |
+| 8 | Orchestrator tenía `edit/bash: allow` pese a ser modo plan | Cambiado a `deny` — solo `read + task` |
+| 9 | Validator tenía `edit/bash: allow` pese a ser "Read Only" | Cambiado a `deny` |
 
 ---
 
