@@ -8,9 +8,9 @@ Sistema multi-agente para **OpenCode Go** con arquitectura de **Orquestador y Es
 
 | Agente | Modelo (Plan Go) | Rol | Permisos |
 |--------|:----------------:|-----|----------|
-| **@orchestrator** | `glm-5.1` | Coordinador — divide tareas y delega | edit, read, task (sin bash) |
+| **@orchestrator** | `glm-5.1` | Coordinador — divide tareas y delega | read, task (modo plan, sin edición ni bash) |
 | **@code-analyst** | `deepseek-v4-pro` | Implementación — escribe código limpio | edit, bash, read |
-| **@validator** | `kimi-k2.6` | QA — valida calidad y ejecuta pruebas | read only |
+| **@validator** | `kimi-k2.6` | QA — valida calidad y revisa código | read only |
 | **@bulk-processor** | `deepseek-v4-flash` | Datos masivos — tareas repetitivas (oculto) | edit, bash, read |
 | **@subagent** | `mimo-v2.5-pro` | Depurador — tareas auxiliares y reserva | edit, bash, read |
 
