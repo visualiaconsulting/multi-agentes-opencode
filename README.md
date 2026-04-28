@@ -1,61 +1,116 @@
 # Multi-Agentes OpenCode (Plan Go) 🚀
 
-Este repositorio contiene una implementación avanzada de un **Sistema Multi-Agente** optimizado para la suscripción **OpenCode Go**. La arquitectura permite la orquestación inteligente de tareas complejas mediante la delegación entre agentes especializados.
+Sistema multi-agente para **OpenCode Go** con arquitectura de **Orquestador y Especialistas**. El orquestador analiza tareas complejas, las desglosa y delega a subagentes especializados, validando el resultado final.
 
-## 📋 Descripción del Sistema
+## 🤖 Agentes Configurados
 
-El sistema utiliza el modelo de "Orquestador y Especialistas". El Orquestador analiza la petición del usuario y, si es compleja, desglosa la tarea y la delega a los subagentes pertinentes, validando finalmente el resultado.
-
-### 🤖 Agentes Configurados
-
-| Agente | Modelo Principal | Rol y Especialidad |
-| :--- | :--- | :--- |
-| **@orchestrator** | `mimo-v2.5-pro` | Coordinación, toma de decisiones y gestión de tareas (`task`). |
-| **@code-analyst** | `deepseek-v4-pro` | Escritura de código, refactorización y análisis de arquitectura. |
-| **@validator** | `kimi-k2.6` | Control de calidad (QA), testing y revisión de seguridad. |
-| **@bulk-processor** | `deepseek-v4-flash` | Tareas repetitivas de alto volumen y procesamiento de datos. |
+| Agente | Modelo | Rol | Permisos |
+|--------|--------|-----|----------|
+| **@orchestrator** | `mimo-v2.5-pro` | Coordinador — divide tareas y delega | full (edit, bash, read, task) |
+| **@code-analyst** | `deepseek-v4-pro` | Implementación — escribe código limpio | edit, bash, read |
+| **@validator** | `kimi-k2.6` | QA — valida calidad, solo lectura | read only |
+| **@bulk-processor** | `deepseek-v4-flash` | Datos masivos — tareas repetitivas | edit, bash, read (hidden) |
 
 ---
 
-## 🛠️ Instalación y Uso
+## 🛠️ Instalación
 
-### 1. Requisitos Previos
-*   **OpenCode CLI** instalado y actualizado.
-*   Suscripción activa a **OpenCode Go**.
-*   Git para control de versiones.
+### Requisitos
+- **OpenCode CLI** instalado
+- Suscripción activa a **OpenCode Go**
+- API key configurada vía `/connect` o variable de entorno
 
-### 2. Configuración Local
-Si acabas de clonar este repositorio, registra los agentes en tu sistema local:
+### Uso directo desde este repositorio
 
 ```powershell
-# Registrar el orquestador principal
-opencode agent create --name orchestrator --path .opencode/agents --model opencode-go/mimo-v2.5-pro --mode primary
-
-# Los subagentes se detectan automáticamente por el orquestador si están en .opencode/agents/
+cd C:\Users\ekrde\OneDrive\ML2025\Investigacion\agentes
+opencode --agent orchestrator
 ```
 
-### 3. Ejecución
-Inicia la sesión de trabajo con el comando:
+### Cómo copiar los agentes a otro proyecto
+
+Para usar estos agentes en otro proyecto (ej. `carbon_footprint_tracker`):
+
 ```powershell
+# 1. Crear directorio en el proyecto destino
+mkdir proyecto\.opencode\agents
+
+# 2. Copiar agentes
+copy agentes\.opencode\agents\*.md proyecto\.opencode\agents\
+
+# 3. Crear context.md adaptado al proyecto
+echo "---
+project: Mi Proyecto
+plan: go
+version: 1.0
+---
+Contexto del proyecto aquí..." > proyecto\.opencode\context.md
+
+# 4. Ejecutar desde el proyecto
+cd proyecto
 opencode --agent orchestrator
 ```
 
 ---
 
-## 📁 Estructura del Repositorio
+## 📁 Estructura
 
-*   `/.opencode/agents/`: Definiciones de agentes (Prompts y configuraciones).
-*   `/.opencode/context.md`: Contexto compartido global del proyecto.
-*   `plan_manager.py`: Herramienta para migrar configuraciones entre diferentes planes de OpenCode.
-*   `README.md`: Documentación principal.
+```
+.opencode/
+├── context.md                 # Contexto global del proyecto
+└── agents/
+    ├── orchestrator.md        # Coordinador principal
+    ├── code-analyst.md        # Implementación de código
+    ├── validator.md           # QA y validación
+    └── bulk-processor.md      # Procesamiento masivo (hidden)
+```
 
 ---
 
-## 🔗 Enlaces de Interés
-*   **Repositorio Oficial**: [multi-agentes-opencode](https://github.com/visualiaconsulting/multi-agentes-opencode)
-*   **Organización**: [VisualIA Consulting](https://github.com/visualiaconsulting)
+## 🧠 Ejemplos de uso
+
+### Tarea de entrenamiento YOLO
+
+```
+> completa el entrenamiento de YOLO26n a 25 epochs con MuSGD y GPU 0
+```
+
+El orquestador:
+1. Pide a `@code-analyst` preparar/completar el script de entrenamiento
+2. Pide a `@validator` revisar que los parámetros sean correctos
+3. Ejecuta el comando final consolidado
+
+### Tarea de análisis
+
+```
+> revisa los resultados del último entrenamiento y compáralos con los anteriores
+```
+
+El orquestador:
+1. Lee los CSV/results.csv
+2. Pide a `@code-analyst` extraer métricas
+3. Pide a `@validator` verificar si se cumplen los targets
+4. Devuelve un resumen comparativo
 
 ---
+
+## 🔧 plan_manager.py
+
+Utilidad para detectar automáticamente el plan de OpenCode activo (go, zen, api, enterprise) y seleccionar los modelos adecuados para cada rol. Soporta override por variables de entorno.
+
+```python
+from plan_manager import PlanManager
+pm = PlanManager()
+print(pm.get_model("orchestrator"))  # Modelo según plan detectado
+```
+
+---
+
+## 🔗 Enlaces
+
+- **Repositorio**: [visualiaconsulting/multi-agentes-opencode](https://github.com/visualiaconsulting/multi-agentes-opencode)
+- **Organización**: [VisualIA Consulting](https://github.com/visualiaconsulting)
 
 ## 📄 Licencia
-Distribuido bajo la Licencia MIT. Para más detalles, ver el archivo `LICENSE`.
+
+MIT
