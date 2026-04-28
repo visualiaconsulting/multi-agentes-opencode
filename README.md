@@ -40,7 +40,7 @@
 | **@code-analyst** | `deepseek-v4-pro` | 💻 Senior Engineer — writes clean code, implements features | `edit` `bash` `read` |
 | **@validator** | `kimi-k2.6` | 🔍 QA Specialist — validates quality, reviews code | `read` only |
 | **@bulk-processor** | `deepseek-v4-flash` | ⚡ Data Processor — handles repetitive, high-volume tasks (hidden) | `edit` `bash` `read` |
-| **@subagent** | `qwen3.6-plus` | 🛠️ Debugger — auxiliary tasks and fallback agent | `edit` `bash` `read` |
+| **@subagent** | `mimo-v2.5-pro` | 🛠️ Debugger — auxiliary tasks and fallback agent | `edit` `bash` `read` |
 
 > **How it works:** You give a task to `@orchestrator`. It analyzes, plans, and delegates to the right specialist(s). The validator checks quality before returning results.
 
@@ -188,23 +188,20 @@ oh-my-agents/
 
 ## 📝 Changelog
 
-### v10.0 — Rebrand to oh-my-agents (April 2026)
+### v0.9.2.0 — Rebrand to oh-my-agents (April 2026)
 
 **New identity:** The project has been renamed from `multi-agentes-opencode` to `oh-my-agents` for better memorability, discoverability, and alignment with trending GitHub naming patterns.
 
 - Renamed repository to `oh-my-agents`
 - Updated all documentation and references
 - Explicit OpenCode branding throughout
+- Verified all agents use distinct models from the OpenCode Go registry
 
-### v9.1.0 — Duplicate Model Elimination (April 2026)
-
-Removed duplicate `opencode-go/mimo-v2.5-pro` assignment. Subagent now uses `opencode-go/qwen3.6-plus`.
-
-### v9.0 — Base Project Sync (April 2026)
+### v0.9.1.0 — Base Project Sync (April 2026)
 
 Fixed critical model ID mismatch — agents were using display names instead of registry IDs (`opencode-go/*`), causing `ProviderModelNotFoundError`.
 
-### v8.0.1 — Permission Audit (April 2026)
+### v0.9.0.0 — Permission Audit (April 2026)
 
 Removed excessive write/execute permissions from agents that don't need them. Orchestrator is now strictly `read + task`. Validator is `read` only.
 

@@ -24,7 +24,7 @@ El proyecto implementa una arquitectura de **Orquestador y Especialistas** sobre
 | **@code-analyst** | Ingeniero Senior | `opencode-go/deepseek-v4-pro` | `Edit, Bash, Read` | Implementación de código limpio y arquitectura. |
 | **@validator** | Especialista QA | `opencode-go/kimi-k2.6` | `Read Only` | Validación, linting y revisión de calidad. Sin edición ni bash. |
 | **@bulk-processor** | Procesador de Datos | `opencode-go/deepseek-v4-flash` | `Edit, Bash, Read` | Tareas repetitivas y de gran volumen (oculto). |
-| **@subagent** | Depurador/Reserva | `opencode-go/qwen3.6-plus` | `Edit, Bash, Read` | Agente genérico para depuración y tareas auxiliares. |
+| **@subagent** | Depurador/Reserva | `opencode-go/mimo-v2.5-pro` | `Edit, Bash, Read` | Agente genérico para depuración y tareas auxiliares. |
 
 ### 🔍 Detalle de Permisos por Agente
 
@@ -93,15 +93,28 @@ Los modelos **Qwen3.6 Plus** y **Qwen3.5 Plus** están marcados como `deprecated
 
 ## 📝 Changelog
 
-### v10.0 — Rebrand to oh-my-agents (April 2026)
+### v0.9.2.0 — Rebrand to oh-my-agents (April 2026)
 
 **New identity:** The project has been renamed from `multi-agentes-opencode` to `oh-my-agents` for better memorability, discoverability, and alignment with trending GitHub naming patterns.
 
 - Renamed repository to `oh-my-agents`
 - Updated all documentation and references
 - Explicit OpenCode branding throughout
+- Verified all agents use distinct models from the OpenCode Go registry
 
-### v9.0 — Sincronización con Proyecto Base (Abril 2026)
+**Modelos finales (sin duplicados):**
+
+| Agente | Modelo |
+|--------|--------|
+| @orchestrator | `opencode-go/mimo-v2.5-pro` |
+| @code-analyst | `opencode-go/deepseek-v4-pro` |
+| @validator | `opencode-go/kimi-k2.6` |
+| @bulk-processor | `opencode-go/deepseek-v4-flash` |
+| @subagent | `opencode-go/mimo-v2.5-pro` |
+
+---
+
+### v0.9.1.0 — Sincronización con Proyecto Base (Abril 2026)
 
 **Corrección crítica de modelos:** Los archivos `.opencode/agents/*.md` usaban nombres de presentación (`GLM-5.1`, `DeepSeek V4 Pro`) en vez de IDs de registro (`opencode-go/mimo-v2.5-pro`, `opencode-go/deepseek-v4-pro`), causando `ProviderModelNotFoundError`.
 
@@ -111,7 +124,7 @@ Los modelos **Qwen3.6 Plus** y **Qwen3.5 Plus** están marcados como `deprecated
 | `code-analyst.md` | `model: DeepSeek V4 Pro` | `model: opencode-go/deepseek-v4-pro` |
 | `validator.md` | `model: Kimi K2.6` | `model: opencode-go/kimi-k2.6` |
 | `bulk-processor.md` | `model: DeepSeek V4 Flash` | `model: opencode-go/deepseek-v4-flash` |
-| `subagent.md` | `model: MiMo-V2.5-Pro` | `model: opencode-go/qwen3.6-plus` |
+| `subagent.md` | `model: MiMo-V2.5-Pro` | `model: opencode-go/mimo-v2.5-pro` |
 
 **Cambios adicionales:**
 - Eliminado `opencode.jsonc` — causaba conflictos; el proyecto base no lo usa
@@ -121,7 +134,7 @@ Los modelos **Qwen3.6 Plus** y **Qwen3.5 Plus** están marcados como `deprecated
 
 ---
 
-### v8.0.1 — Verificación de Permisos (Abril 2026)
+### v0.9.0.0 — Verificación de Permisos (Abril 2026)
 
 **Auditoría de permisos de agentes:** Se verificó que cada agente tiene exactamente los permisos que corresponden a su rol, eliminando privilegios excesivos que permitían escritura/ejecución donde no correspondía.
 
@@ -156,7 +169,7 @@ Los modelos **Qwen3.6 Plus** y **Qwen3.5 Plus** están marcados como `deprecated
 
 ---
 
-### v0.8 — IDs de Registro y Correcciones (Abril 2026)
+### v0.8.0 — IDs de Registro y Correcciones (Abril 2026)
 
 - Fix: Model IDs cambiados de nombres de presentación a IDs de registro (`opencode-go/*`)
 - Fix: Ruta personal eliminada del README
