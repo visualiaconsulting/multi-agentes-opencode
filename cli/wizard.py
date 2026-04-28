@@ -56,12 +56,12 @@ class SetupWizard:
         table.add_column("Modelo", style="white")
         table.add_column("Rol", style="dim")
 
-        table.add_row("orchestrator", "GLM-5.1", "Primary")
-        table.add_row("code-analyst", "DeepSeek V4 Pro", "Subagent")
-        table.add_row("validator", "Kimi K2.6", "Subagent")
-        table.add_row("bulk-processor", "DeepSeek V4 Flash", "Subagent")
-        table.add_row("subagent", "MiMo-V2.5-Pro", "Reserva")
-        table.add_row("fallback", "MiniMax M2.5", "Speed/Recovery")
+        table.add_row("orchestrator", "opencode-go/mimo-v2.5-pro", "Primary")
+        table.add_row("code-analyst", "opencode-go/deepseek-v4-pro", "Subagent")
+        table.add_row("validator", "opencode-go/kimi-k2.6", "Subagent")
+        table.add_row("bulk-processor", "opencode-go/deepseek-v4-flash", "Subagent")
+        table.add_row("subagent", "opencode-go/mimo-v2.5-pro", "Reserva")
+        table.add_row("fallback", "opencode-go/minimax-m2.5", "Speed/Recovery")
         
         console.print(table)
 
@@ -69,12 +69,20 @@ class SetupWizard:
         """Configura los agentes recomendados automáticamente"""
         self.agents = [] # Reset
         defaults = [
-            {"name": "orchestrator", "role": "primary", "model": "GLM-5.1", "desc": "Orquestador central del sistema"},
-            {"name": "code-analyst", "role": "subagent", "model": "DeepSeek V4 Pro", "desc": "Ingeniero de software senior"},
-            {"name": "validator", "role": "subagent", "model": "Kimi K2.6", "desc": "QA y validador de código"},
-            {"name": "bulk-processor", "role": "subagent", "model": "DeepSeek V4 Flash", "desc": "Procesamiento masivo de datos"},
-            {"name": "subagent", "role": "subagent", "model": "MiMo-V2.5-Pro", "desc": "Agente de reserva y tareas genéricas"}
+            {"name": "orchestrator", "role": "primary", "model": "opencode-go/mimo-v2.5-pro", "desc": "Orquestador central del sistema"},
+            {"name": "code-analyst", "role": "subagent", "model": "opencode-go/deepseek-v4-pro", "desc": "Ingeniero de software senior"},
+            {"name": "validator", "role": "subagent", "model": "opencode-go/kimi-k2.6", "desc": "QA y validador de código"},
+            {"name": "bulk-processor", "role": "subagent", "model": "opencode-go/deepseek-v4-flash", "desc": "Procesamiento masivo de datos"},
+            {"name": "subagent", "role": "subagent", "model": "opencode-go/mimo-v2.5-pro", "desc": "Agente de reserva y tareas genéricas"}
         ]
+
+        permissions_map = {
+            "orchestrator":     {"edit": "deny",  "bash": "deny",  "read": "allow", "task": "allow"},
+            "code-analyst":     {"edit": "allow", "bash": "allow", "read": "allow", "task": "deny"},
+            "validator":        {"edit": "deny",  "bash": "deny",  "read": "allow", "task": "deny"},
+            "bulk-processor":   {"edit": "allow", "bash": "allow", "read": "allow", "task": "deny"},
+            "subagent":         {"edit": "allow", "bash": "allow", "read": "allow", "task": "deny"},
+        }
 
         for d in defaults:
             agent_config = {
@@ -82,12 +90,9 @@ class SetupWizard:
                 "description": d["desc"],
                 "mode": d["role"],
                 "model": d["model"],
-                "permissions": {
-                    "edit": "allow",
-                    "bash": "allow",
-                    "read": "allow",
-                    "task": "allow" if d["role"] == "primary" else "deny"
-                }
+                "permissions": permissions_map.get(d["name"], {
+                    "edit": "allow", "bash": "allow", "read": "allow", "task": "deny"
+                })
             }
             self.agents.append(agent_config)
 

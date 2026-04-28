@@ -8,7 +8,7 @@ Sistema multi-agente para **OpenCode Go** con arquitectura de **Orquestador y Es
 
 | Agente | Modelo (Plan Go) | Rol | Permisos |
 |--------|:----------------:|-----|----------|
-| **@orchestrator** | `glm-5.1` | Coordinador — divide tareas y delega | read, task (modo plan, sin edición ni bash) |
+| **@orchestrator** | `mimo-v2.5-pro` | Coordinador — divide tareas y delega | edit, bash, read, task |
 | **@code-analyst** | `deepseek-v4-pro` | Implementación — escribe código limpio | edit, bash, read |
 | **@validator** | `kimi-k2.6` | QA — valida calidad y revisa código | read only |
 | **@bulk-processor** | `deepseek-v4-flash` | Datos masivos — tareas repetitivas (oculto) | edit, bash, read |
@@ -16,36 +16,30 @@ Sistema multi-agente para **OpenCode Go** con arquitectura de **Orquestador y Es
 
 ---
 
-## ⚠️ Issue Conocido: Modelos Qwen Deshabilitados
+## 🚀 Inicio Rápido (3 pasos)
 
-Los modelos **Qwen3.6 Plus** y **Qwen3.5 Plus** están marcados como `deprecated` en el registry de OpenCode. Para habilitarlos en el plan Go, se incluye `opencode.jsonc` con el workaround que fuerza el status `beta`.
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/visualiaconsulting/multi-agentes-opencode.git
+cd multi-agentes-opencode
 
-### Solución en opencode.jsonc
+# 2. Ejecutar el setup (instala deps y configura agentes)
+.\setup.ps1        # Windows
+# o
+./setup.sh         # Linux/Mac
 
-```jsonc
-"provider": {
-  "opencode-go": {
-    "models": {
-      "glm-5.1": {
-        "name": "GLM-5.1",
-        "reasoning": true
-      },
-      "qwen3.6-plus": {
-        "name": "Qwen3.6 Plus",
-        "reasoning": true,
-        "status": "beta"
-      },
-      "qwen3.5-plus": {
-        "name": "Qwen3.5 Plus",
-        "reasoning": true,
-        "status": "beta"
-      }
-    }
-  }
-}
+# 3. ¡Listo! El asistente te guía para configurar tus agentes
 ```
 
-> **Nota:** Si el workaround no funciona, cambia el modelo del orquestador a `mimo-v2.5-pro` en `.opencode/agents/orchestrator.md`.
+> **¿Ya tienes OpenCode CLI?** El setup te dirá si falta. Instálalo desde [opencode.ai](https://opencode.ai).
+
+---
+
+## ⚠️ Issue Conocido: Modelos Qwen Deshabilitados (Resuelto)
+
+Los modelos **Qwen3.6 Plus** y **Qwen3.5 Plus** están marcados como `deprecated` en el registry de OpenCode.
+
+> **Solución aplicada:** Se cambió el modelo del orquestador a `opencode-go/mimo-v2.5-pro` (igual que el proyecto base que funciona sin errores). Se eliminó `opencode.jsonc` que causaba conflictos.
 
 ### Referencia
 - Issue: [#22644](https://github.com/anomalyco/opencode/issues/22644)
@@ -100,14 +94,13 @@ opencode --agent orchestrator
 ./
 ├── AGENTS.md                    # Estado detallado de agentes
 ├── README.md                    # Este documento
-├── opencode.jsonc               # Configuración global de OpenCode
 ├── plan_manager.py              # Lógica de selección de modelos
 ├── main.py                      # CLI del sistema multi-agente
 ├── cli/
 │   ├── wizard.py                # Asistente de configuración interactivo
 │   └── ui.py                    # Componentes visuales (rich)
 └── .opencode/
-    ├── CONTEXT.md               # Contexto global inyectado a todos los agentes
+    ├── context.md               # Contexto global inyectado a todos los agentes
     └── agents/
         ├── orchestrator.md      # Coordinador principal
         ├── code-analyst.md      # Ingeniero de software senior
@@ -162,7 +155,7 @@ print(f"Modelos disponibles: {pm.get_available_models()}")
 
 | Plan | Método de Detección | Modelo Orquestador |
 |------|---------------------|--------------------|
-| **Go** (defecto) | Por omisión o `OPENCODE_PLAN=go` | `opencode-go/glm-5.1` |
+| **Go** (defecto) | Por omisión o `OPENCODE_PLAN=go` | `opencode-go/mimo-v2.5-pro` |
 | **Zen** | `GITHUB_TOKEN` o `COPILOT_TOKEN` | `opencode/claude-sonnet-4.5` |
 | **API** | `ANTHROPIC_API_KEY` | `anthropic/claude-sonnet-4` (configurable) |
 | **Enterprise** | `OPENCODE_PLAN=enterprise` | `opencode-go/mimo-v2.5-pro` (configurable) |
@@ -170,6 +163,23 @@ print(f"Modelos disponibles: {pm.get_available_models()}")
 ---
 
 ## 📝 Changelog
+
+### v9.0 — Sincronización con Proyecto Base (Abril 2026)
+
+**Corrección crítica de modelos:** Los archivos `.opencode/agents/*.md` usaban nombres de presentación en vez de IDs de registro, causando `ProviderModelNotFoundError`.
+
+| Archivo | Antes (roto) | Después (correcto) |
+|---------|--------------|---------------------|
+| `orchestrator.md` | `model: GLM-5.1` | `model: opencode-go/mimo-v2.5-pro` |
+| `code-analyst.md` | `model: DeepSeek V4 Pro` | `model: opencode-go/deepseek-v4-pro` |
+| `validator.md` | `model: Kimi K2.6` | `model: opencode-go/kimi-k2.6` |
+| `bulk-processor.md` | `model: DeepSeek V4 Flash` | `model: opencode-go/deepseek-v4-flash` |
+| `subagent.md` | `model: MiMo-V2.5-Pro` | `model: opencode-go/mimo-v2.5-pro` |
+
+**Cambios adicionales:**
+- Eliminado `opencode.jsonc` — causaba conflictos; el proyecto base no lo usa
+- Modelo del orquestador: `glm-5.1` → `mimo-v2.5-pro` (consistente con proyecto base)
+- Permisos del orquestador: `edit: allow`, `bash: allow` (como en el proyecto base)
 
 ### v8.0.1 — Verificación de Permisos (Abril 2026)
 
@@ -203,6 +213,8 @@ El orquestador ahora es estrictamente **modo plan** (solo `read + task`), y el v
 | 7 | Agentes usaban nombres de presentación en vez de IDs de registro | Cambiados a `opencode-go/*` |
 | 8 | Orchestrator tenía `edit/bash: allow` pese a ser modo plan | Cambiado a `deny` — solo `read + task` |
 | 9 | Validator tenía `edit/bash: allow` pese a ser "Read Only" | Cambiado a `deny` |
+| 10 | `opencode.jsonc` causaba conflictos de configuración | Eliminado — el proyecto base no lo usa |
+| 11 | Modelo del orquestador `glm-5.1` inconsistente con proyecto base | Cambiado a `opencode-go/mimo-v2.5-pro` |
 
 ---
 

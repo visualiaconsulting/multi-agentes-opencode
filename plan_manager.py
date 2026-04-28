@@ -12,7 +12,7 @@ class PlanManager:
     # Usando IDs de registro (provider/model-id) que OpenCode reconoce
     PLAN_MODELS = {
         "go": {
-            "orchestrator": "opencode-go/glm-5.1",
+            "orchestrator": "opencode-go/mimo-v2.5-pro",
             "code-analyst": "opencode-go/deepseek-v4-pro",
             "validator": "opencode-go/kimi-k2.6",
             "bulk-processor": "opencode-go/deepseek-v4-flash",
