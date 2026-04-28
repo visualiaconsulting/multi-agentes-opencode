@@ -1,4 +1,4 @@
-# Estado de Agentes — Proyecto Agentes
+# Estado de Agentes — oh-my-agents
 
 Este documento describe la configuración, estado y arquitectura del sistema multi-agente del proyecto.
 
@@ -92,6 +92,14 @@ Los modelos **Qwen3.6 Plus** y **Qwen3.5 Plus** están marcados como `deprecated
 ---
 
 ## 📝 Changelog
+
+### v10.0 — Rebrand to oh-my-agents (April 2026)
+
+**New identity:** The project has been renamed from `multi-agentes-opencode` to `oh-my-agents` for better memorability, discoverability, and alignment with trending GitHub naming patterns.
+
+- Renamed repository to `oh-my-agents`
+- Updated all documentation and references
+- Explicit OpenCode branding throughout
 
 ### v9.0 — Sincronización con Proyecto Base (Abril 2026)
 
@@ -233,6 +241,6 @@ print(f"Modelos disponibles: {pm.get_available_models()}")
 
 ## 🔗 Enlaces
 
-- **Repositorio**: [visualiaconsulting/multi-agentes-opencode](https://github.com/visualiaconsulting/multi-agentes-opencode)
+- **Repositorio**: [visualiaconsulting/oh-my-agents](https://github.com/visualiaconsulting/oh-my-agents)
 - **Organización**: [VisualIA Consulting](https://github.com/visualiaconsulting)
 - **Licencia**: MIT

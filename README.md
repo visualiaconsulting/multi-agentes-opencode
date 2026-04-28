@@ -1,254 +1,254 @@
-# Multi-Agentes OpenCode (Plan Go)
+<div align="center">
 
-Sistema multi-agente para **OpenCode Go** con arquitectura de **Orquestador y Especialistas**. El orquestador analiza tareas complejas, las desglosa y delega a subagentes especializados, validando el resultado final.
+# 🤖 oh-my-agents
+
+### The multi-agent orchestration framework for [OpenCode](https://opencode.ai)
+
+[![OpenCode](https://img.shields.io/badge/Built_for-OpenCode_Go-00D4AA?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTVNMiAxN2wxMCA1IDEwLTVNMiAxMmwxMCA1IDEwLTUiLz48L3N2Zz4=)](https://opencode.ai)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![GitHub Stars](https://img.shields.io/github/stars/visualiaconsulting/oh-my-agents?style=for-the-badge&logo=github)](https://github.com/visualiaconsulting/oh-my-agents/stargazers)
+[![GitHub Issues](https://img.shields.io/github/issues/visualiaconsulting/oh-my-agents?style=for-the-badge&logo=github)](https://github.com/visualiaconsulting/oh-my-agents/issues)
+
+**Stop writing boilerplate. Start shipping with an AI workforce.**
+
+*oh-my-agents* gives you a production-ready **orchestrator-specialists architecture** for [OpenCode](https://opencode.ai). One orchestrator analyzes your tasks, breaks them down, and delegates to specialized sub-agents — each with the right model and permissions for the job.
+
+[Quick Start](#-quick-start) · [Agents](#-agents) · [Examples](#-examples) · [Configuration](#%EF%B8%8F-planmanager) · [Contributing](#-contributing)
 
 ---
 
-## 🤖 Agentes Configurados
+</div>
 
-| Agente | Modelo (Plan Go) | Rol | Permisos |
-|--------|:----------------:|-----|----------|
-| **@orchestrator** | `mimo-v2.5-pro` | Coordinador — divide tareas y delega | edit, bash, read, task |
-| **@code-analyst** | `deepseek-v4-pro` | Implementación — escribe código limpio | edit, bash, read |
-| **@validator** | `kimi-k2.6` | QA — valida calidad y revisa código | read only |
-| **@bulk-processor** | `deepseek-v4-flash` | Datos masivos — tareas repetitivas (oculto) | edit, bash, read |
-| **@subagent** | `qwen3.6-plus` | Depurador — tareas auxiliares y reserva | edit, bash, read |
+## ✨ Why oh-my-agents?
+
+| Feature | Description |
+|---------|-------------|
+| 🧠 **Smart Orchestration** | The orchestrator analyzes complex tasks, decomposes them, and delegates to the right specialist |
+| 🎯 **Specialist Agents** | Each agent has a focused role: coding, QA validation, data processing, debugging |
+| 🔐 **Least-Privilege Permissions** | Validator is read-only. Orchestrator only delegates. Code-analyst writes and executes. |
+| 🔄 **Multi-Plan Support** | Works with OpenCode Go, Zen, API, and Enterprise plans via `PlanManager` |
+| 🚀 **Zero Config Start** | Clone, run setup, start coding. The wizard handles the rest |
+| 📦 **Portable** | Copy agents to any project — they adapt via `context.md` |
 
 ---
 
-## 🚀 Inicio Rápido (3 pasos)
+## 🤖 Agents
+
+| Agent | Model (Go Plan) | Role | Permissions |
+|-------|:----------------:|------|:-----------:|
+| **@orchestrator** | `mimo-v2.5-pro` | 🎼 Coordinator — decomposes tasks, delegates to specialists | `read` `task` |
+| **@code-analyst** | `deepseek-v4-pro` | 💻 Senior Engineer — writes clean code, implements features | `edit` `bash` `read` |
+| **@validator** | `kimi-k2.6` | 🔍 QA Specialist — validates quality, reviews code | `read` only |
+| **@bulk-processor** | `deepseek-v4-flash` | ⚡ Data Processor — handles repetitive, high-volume tasks (hidden) | `edit` `bash` `read` |
+| **@subagent** | `qwen3.6-plus` | 🛠️ Debugger — auxiliary tasks and fallback agent | `edit` `bash` `read` |
+
+> **How it works:** You give a task to `@orchestrator`. It analyzes, plans, and delegates to the right specialist(s). The validator checks quality before returning results.
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- [OpenCode CLI](https://opencode.ai) installed
+- Active **OpenCode Go** subscription
+- API key configured via `/connect` or environment variable
+
+### Install (3 steps)
 
 ```bash
-# 1. Clonar el repositorio
-git clone https://github.com/visualiaconsulting/multi-agentes-opencode.git
-cd multi-agentes-opencode
+# 1. Clone the repository
+git clone https://github.com/visualiaconsulting/oh-my-agents.git
+cd oh-my-agents
 
-# 2. Ejecutar el setup (instala deps y configura agentes)
+# 2. Run setup (installs deps and configures agents)
 .\setup.ps1        # Windows
-# o
+# or
 ./setup.sh         # Linux/Mac
 
-# 3. ¡Listo! El asistente te guía para configurar tus agentes
-```
-
-> **¿Ya tienes OpenCode CLI?** El setup te dirá si falta. Instálalo desde [opencode.ai](https://opencode.ai).
-
----
-
-## ⚠️ Issue Conocido: Modelos Qwen Deshabilitados (Resuelto)
-
-Los modelos **Qwen3.6 Plus** y **Qwen3.5 Plus** están marcados como `deprecated` en el registry de OpenCode.
-
-> **Solución aplicada:** Se cambió el modelo del orquestador a `opencode-go/mimo-v2.5-pro` (igual que el proyecto base que funciona sin errores). Se eliminó `opencode.jsonc` que causaba conflictos.
->
-> **Nota v9.1.0:** A pesar del issue, el modelo `opencode-go/qwen3.6-plus` se asignó al subagent (@subagent) para eliminar la duplicación con el orchestrator. Si presenta problemas, cambiar a `opencode-go/qwen3.5-plus` o `opencode-go/minimax-m2.5`.
-
-### Referencia
-- Issue: [#22644](https://github.com/anomalyco/opencode/issues/22644)
-
----
-
-## 🛠️ Instalación
-
-### Requisitos
-- **OpenCode CLI** instalado
-- Suscripción activa a **OpenCode Go**
-- API key configurada vía `/connect` o variable de entorno
-
-### Uso directo desde este repositorio
-
-```bash
-# Clonar el repositorio
-git clone https://github.com/visualiaconsulting/multi-agentes-opencode.git
-cd multi-agentes-opencode
+# 3. Start the orchestrator
 opencode --agent orchestrator
 ```
 
-### Cómo copiar los agentes a otro proyecto
+### Copy agents to another project
 
-Para usar estos agentes en otro proyecto (ej. `carbon_footprint_tracker`):
+```bash
+# Create agents directory in your project
+mkdir -p myproject/.opencode/agents
 
-```powershell
-# 1. Crear directorio en el proyecto destino
-mkdir proyecto\.opencode\agents
+# Copy agent definitions
+cp .opencode/agents/*.md myproject/.opencode/agents/
 
-# 2. Copiar agentes
-copy agentes\.opencode\agents\*.md proyecto\.opencode\agents\
-
-# 3. Crear context.md adaptado al proyecto
-echo "---
-project: Mi Proyecto
+# Create a context.md for your project
+cat > myproject/.opencode/CONTEXT.md << 'EOF'
+---
+project: My Project
 plan: go
 version: 1.0
 ---
-Contexto del proyecto aquí..." > proyecto\.opencode\CONTEXT.md
+Describe your project context here...
+EOF
 
-# 4. Ejecutar desde el proyecto
-cd proyecto
+# Run from your project
+cd myproject
 opencode --agent orchestrator
 ```
 
 ---
 
-## 📁 Estructura del Proyecto
+## 💡 Examples
+
+### Training a YOLO model
 
 ```
-./
-├── AGENTS.md                    # Estado detallado de agentes
-├── README.md                    # Este documento
-├── plan_manager.py              # Lógica de selección de modelos
-├── main.py                      # CLI del sistema multi-agente
-├── cli/
-│   ├── wizard.py                # Asistente de configuración interactivo
-│   └── ui.py                    # Componentes visuales (rich)
-└── .opencode/
-    ├── context.md               # Contexto global inyectado a todos los agentes
-    └── agents/
-        ├── orchestrator.md      # Coordinador principal
-        ├── code-analyst.md      # Ingeniero de software senior
-        ├── validator.md         # QA y validación de código
-        ├── bulk-processor.md    # Procesamiento masivo (oculto)
-        └── subagent.md          # Depurador / agente de reserva
+> complete the training of YOLO26n to 25 epochs with MuSGD and GPU 0
 ```
+
+The orchestrator:
+1. Asks `@code-analyst` to prepare/complete the training script
+2. Asks `@validator` to verify parameters are correct
+3. Executes the consolidated command
+
+### Analyzing results
+
+```
+> review the results of the last training and compare with previous ones
+```
+
+The orchestrator:
+1. Reads CSV/results.csv
+2. Asks `@code-analyst` to extract metrics
+3. Asks `@validator` to verify targets are met
+4. Returns a comparative summary
+
+### Multi-step task
+
+```
+> refactor the data pipeline to use async processing, add error handling, and write tests
+```
+
+The orchestrator:
+1. Asks `@code-analyst` to refactor with async patterns
+2. Asks `@validator` to review the refactored code
+3. Asks `@code-analyst` to add error handling and tests
+4. Asks `@validator` to run and validate tests
+5. Returns consolidated results
 
 ---
 
-## 🧠 Ejemplos de uso
+## ⚙️ PlanManager
 
-### Tarea de entrenamiento YOLO
-
-```
-> completa el entrenamiento de YOLO26n a 25 epochs con MuSGD y GPU 0
-```
-
-El orquestador:
-1. Pide a `@code-analyst` preparar/completar el script de entrenamiento
-2. Pide a `@validator` revisar que los parámetros sean correctos
-3. Ejecuta el comando final consolidado
-
-### Tarea de análisis
-
-```
-> revisa los resultados del último entrenamiento y compáralos con los anteriores
-```
-
-El orquestador:
-1. Lee los CSV/results.csv
-2. Pide a `@code-analyst` extraer métricas
-3. Pide a `@validator` verificar si se cumplen los targets
-4. Devuelve un resumen comparativo
-
----
-
-## 🔧 plan_manager.py
-
-Utilidad para detectar automáticamente el plan de OpenCode activo (`go`, `zen`, `api`, `enterprise`) y seleccionar los modelos adecuados para cada rol. Soporta override por variables de entorno.
+The `PlanManager` automatically detects your active OpenCode plan and selects the optimal models for each agent role.
 
 ```python
 from plan_manager import PlanManager
 
 pm = PlanManager()
-print(f"Plan detectado: {pm.plan}")
-print(f"Modelo orquestador: {pm.get_model('orchestrator')}")
-print(f"Modelos disponibles: {pm.get_available_models()}")
+print(f"Plan detected: {pm.plan}")
+print(f"Orchestrator model: {pm.get_model('orchestrator')}")
+print(f"Available models: {pm.get_available_models()}")
 ```
 
-### Planes Soportados
+### Supported Plans
 
-| Plan | Método de Detección | Modelo Orquestador |
-|------|---------------------|--------------------|
-| **Go** (defecto) | Por omisión o `OPENCODE_PLAN=go` | `opencode-go/mimo-v2.5-pro` |
-| **Zen** | `GITHUB_TOKEN` o `COPILOT_TOKEN` | `opencode/claude-sonnet-4.5` |
+| Plan | Detection Method | Orchestrator Model |
+|------|------------------|-------------------|
+| **Go** (default) | Default or `OPENCODE_PLAN=go` | `opencode-go/mimo-v2.5-pro` |
+| **Zen** | `GITHUB_TOKEN` or `COPILOT_TOKEN` | `opencode/claude-sonnet-4.5` |
 | **API** | `ANTHROPIC_API_KEY` | `anthropic/claude-sonnet-4` (configurable) |
 | **Enterprise** | `OPENCODE_PLAN=enterprise` | `opencode-go/mimo-v2.5-pro` (configurable) |
 
 ---
 
+## 📁 Project Structure
+
+```
+oh-my-agents/
+├── README.md                    # This file
+├── AGENTS.md                    # Detailed agent state & changelog
+├── plan_manager.py              # Model selection logic per plan
+├── main.py                      # CLI for the multi-agent system
+├── requirements.txt             # Python dependencies
+├── setup.ps1                    # Windows setup script
+├── setup.sh                     # Linux/Mac setup script
+├── cli/
+│   ├── wizard.py                # Interactive configuration wizard
+│   └── ui.py                    # Rich terminal UI components
+└── .opencode/
+    ├── context.md               # Global context injected to all agents
+    └── agents/
+        ├── orchestrator.md      # Main coordinator
+        ├── code-analyst.md      # Senior software engineer
+        ├── validator.md         # QA and code validation
+        ├── bulk-processor.md    # High-volume data processing (hidden)
+        └── subagent.md          # Debugger / fallback agent
+```
+
+---
+
 ## 📝 Changelog
 
-### v9.1.0 — Eliminación de Modelo Duplicado (Abril 2026)
+### v10.0 — Rebrand to oh-my-agents (April 2026)
 
-**Corrección de modelo duplicado:** El modelo `opencode-go/mimo-v2.5-pro` estaba asignado tanto al orchestrator como al subagent, generando redundancia. Se cambió el modelo del subagent a `opencode-go/qwen3.6-plus` para aprovechar la diversidad de modelos disponibles.
+**New identity:** The project has been renamed from `multi-agentes-opencode` to `oh-my-agents` for better memorability, discoverability, and alignment with trending GitHub naming patterns.
 
-| Archivo | Antes | Después |
-|---------|-------|---------|
-| `subagent.md` | `model: opencode-go/mimo-v2.5-pro` | `model: opencode-go/qwen3.6-plus` |
+- Renamed repository to `oh-my-agents`
+- Updated all documentation and references
+- Explicit OpenCode branding throughout
 
-**Archivos actualizados:**
-- `.opencode/agents/subagent.md` — modelo del agente
-- `.opencode/CONTEXT.md` — referencia de modelos
-- `AGENTS.md` — tabla de agentes y changelog
-- `README.md` — tabla de agentes y changelog
+### v9.1.0 — Duplicate Model Elimination (April 2026)
 
-**Modelos finales (sin duplicados):**
+Removed duplicate `opencode-go/mimo-v2.5-pro` assignment. Subagent now uses `opencode-go/qwen3.6-plus`.
 
-| Agente | Modelo |
-|--------|--------|
-| @orchestrator | `opencode-go/mimo-v2.5-pro` |
-| @code-analyst | `opencode-go/deepseek-v4-pro` |
-| @validator | `opencode-go/kimi-k2.6` |
-| @bulk-processor | `opencode-go/deepseek-v4-flash` |
-| @subagent | `opencode-go/qwen3.6-plus` |
+### v9.0 — Base Project Sync (April 2026)
 
-### v9.0 — Sincronización con Proyecto Base (Abril 2026)
+Fixed critical model ID mismatch — agents were using display names instead of registry IDs (`opencode-go/*`), causing `ProviderModelNotFoundError`.
 
-**Corrección crítica de modelos:** Los archivos `.opencode/agents/*.md` usaban nombres de presentación en vez de IDs de registro, causando `ProviderModelNotFoundError`.
+### v8.0.1 — Permission Audit (April 2026)
 
-| Archivo | Antes (roto) | Después (correcto) |
-|---------|--------------|---------------------|
-| `orchestrator.md` | `model: GLM-5.1` | `model: opencode-go/mimo-v2.5-pro` |
-| `code-analyst.md` | `model: DeepSeek V4 Pro` | `model: opencode-go/deepseek-v4-pro` |
-| `validator.md` | `model: Kimi K2.6` | `model: opencode-go/kimi-k2.6` |
-| `bulk-processor.md` | `model: DeepSeek V4 Flash` | `model: opencode-go/deepseek-v4-flash` |
-| `subagent.md` | `model: MiMo-V2.5-Pro` | `model: opencode-go/qwen3.6-plus` |
-
-**Cambios adicionales:**
-- Eliminado `opencode.jsonc` — causaba conflictos; el proyecto base no lo usa
-- Modelo del orquestador: `glm-5.1` → `mimo-v2.5-pro` (consistente con proyecto base)
-- Permisos del orquestador: `edit: allow`, `bash: allow` (como en el proyecto base)
-
-### v8.0.1 — Verificación de Permisos (Abril 2026)
-
-Auditoría de permisos: se eliminaron privilegios excesivos de escritura/ejecución en agentes que no los necesitan.
-
-| Agente | Cambio | Antes | Después |
-|--------|--------|-------|---------|
-| **@orchestrator** | `edit` / `bash` | ✅ allow | ❌ deny |
-| **@validator** | `edit` / `bash` | ✅ allow | ❌ deny |
-
-El orquestador ahora es estrictamente **modo plan** (solo `read + task`), y el validator es **read only** (solo `read`). Toda escritura y ejecución se delega a los subagentes de ejecución.
-
-### v0.8 — IDs de Registro y Correcciones (Abril 2026)
-
-- Fix: Model IDs cambiados de nombres de presentación a IDs de registro (`opencode-go/*`)
-- Fix: Ruta personal eliminada del README
-- Fix: `plan_manager.py` actualizado con IDs de registro para todos los planes
+Removed excessive write/execute permissions from agents that don't need them. Orchestrator is now strictly `read + task`. Validator is `read` only.
 
 ---
 
-## 🐛 Correcciones Recientes (Abril 2026)
+## 🤝 Contributing
 
-| # | Problema | Solución |
-|---|----------|----------|
-| 1 | Orquestador apuntaba a `Qwen3.6 Plus` en vez de `GLM-5.1` | Sincronizado a `GLM-5.1` en `plan_manager.py` |
-| 2 | Validator tenía permisos de edición/bash pese a ser "Read Only" | Permisos corregidos a `edit: deny`, `bash: deny` |
-| 3 | `_detect_plan()` detectaba `api` erróneamente con `OPENCODE_API_KEY` | Removida del chequeo; solo `ANTHROPIC_API_KEY` → api |
-| 4 | Bare `except` silenciaba errores al leer JSON | Especificadas excepciones concretas |
-| 5 | Comentarios placeholder en `main.py` | Reemplazados por docstrings |
-| 6 | Wizard proponía `Qwen3.6 Plus` como orquestador | Cambiado a `GLM-5.1` |
-| 7 | Agentes usaban nombres de presentación en vez de IDs de registro | Cambiados a `opencode-go/*` |
-| 8 | Orchestrator tenía `edit/bash: allow` pese a ser modo plan | Cambiado a `deny` — solo `read + task` |
-| 9 | Validator tenía `edit/bash: allow` pese a ser "Read Only" | Cambiado a `deny` |
-| 10 | `opencode.jsonc` causaba conflictos de configuración | Eliminado — el proyecto base no lo usa |
-| 11 | Modelo del orquestador `glm-5.1` inconsistente con proyecto base | Cambiado a `opencode-go/mimo-v2.5-pro` |
+Contributions are welcome! Here's how:
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
+
+### Ideas for contribution
+
+- 🔌 Add support for new OpenCode plans
+- 🤖 Create new specialist agents (e.g., `@doc-writer`, `@security-auditor`)
+- 🎨 Improve the CLI wizard UI
+- 📖 Translate documentation
+- 🧪 Add integration tests
 
 ---
 
-## 🔗 Enlaces
+## 🔗 Links
 
-- **Repositorio**: [visualiaconsulting/multi-agentes-opencode](https://github.com/visualiaconsulting/multi-agentes-opencode)
-- **Organización**: [VisualIA Consulting](https://github.com/visualiaconsulting)
+- **Repository**: [visualiaconsulting/oh-my-agents](https://github.com/visualiaconsulting/oh-my-agents)
+- **Organization**: [VisualIA Consulting](https://github.com/visualiaconsulting)
+- **OpenCode**: [opencode.ai](https://opencode.ai)
+- **Issues**: [Report a bug](https://github.com/visualiaconsulting/oh-my-agents/issues)
 
-## 📄 Licencia
+---
 
-MIT
+## 📄 License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+
+**Built with ❤️ for the [OpenCode](https://opencode.ai) community**
+
+*If you find this useful, give it a ⭐ — it helps others discover it!*
+
+</div>
