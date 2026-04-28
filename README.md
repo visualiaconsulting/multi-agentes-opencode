@@ -70,6 +70,9 @@ cd oh-my-agents
 opencode --agent orchestrator
 ```
 
+> **Windows note:** If you get an execution policy error, run:
+> `powershell -ExecutionPolicy Bypass -File setup.ps1`
+
 ### Copy agents to another project
 
 ```bash
@@ -93,6 +96,21 @@ EOF
 cd myproject
 opencode --agent orchestrator
 ```
+
+### Install globally
+
+To make agents available from **any directory** (not just the cloned repo):
+
+```bash
+# From the oh-my-agents directory:
+python main.py --install-global
+
+# Or via the setup scripts:
+.\setup.ps1          # Will prompt for global install at the end
+./setup.sh --install-global  # Linux/Mac one-liner
+```
+
+This copies agent definitions to `~/.opencode/agents/`, which OpenCode reads automatically.
 
 ---
 
@@ -184,9 +202,31 @@ oh-my-agents/
         └── subagent.md          # Debugger / fallback agent
 ```
 
+### CLI Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `--setup` | Force the setup wizard to reconfigure agents |
+| `--doctor` | Diagnose environment issues (Python, deps, OpenCode CLI, agents) |
+| `--install-global` | Copy agent `.md` files to `~/.opencode/agents/` for global use |
+| `--dir DIR` | Override the auto-detected project root directory |
+
 ---
 
 ## 📝 Changelog
+
+### v0.9.3.1 — Path Independence & Setup Fixes (April 2026)
+
+**Critical fix:** All Python files now use `Path(__file__).parent` for path resolution instead of relative paths. The system works correctly regardless of the current working directory.
+
+- `main.py`: Added `PROJECT_ROOT` constant, `--install-global`, `--dir` flags
+- `cli/wizard.py`: Accepts `project_root` parameter, derives paths from script location
+- `plan_manager.py`: Accepts `project_root` parameter for config file detection
+- `setup.ps1`: Fixed ExecutionPolicy guidance, robust Python detection (`py -3` → `python3` → `python`), absolute paths, global install option
+- `setup.sh`: Added `cd` to script directory, absolute paths, `--install-global` flag
+- All setup messages translated to English
+- `AGENTS.md`: Updated changelog, file structure, code infrastructure docs, recent fixes table
+- `context.md`: Updated version field to 0.9.3.1
 
 ### v0.9.2.3 — Full English Translation (April 2026)
 

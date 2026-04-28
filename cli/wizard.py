@@ -5,17 +5,19 @@ from rich.prompt import Prompt, Confirm
 from cli.ui import console, print_step, print_success, print_error
 from plan_manager import PlanManager
 
-AGENT_DIR = Path(".opencode/agents")
 
 class SetupWizard:
-    def __init__(self):
-        self.pm = PlanManager()
+    def __init__(self, project_root=None):
         self.agents = []
+        # Use project_root if provided, otherwise derive from this file's location (cli/wizard.py -> project root)
+        self.project_root = Path(project_root).resolve() if project_root else Path(__file__).resolve().parent.parent
+        self.agent_dir = self.project_root / ".opencode" / "agents"
+        self.pm = PlanManager(project_root=self.project_root)
 
     def check_existing_config(self):
-        if not AGENT_DIR.exists():
+        if not self.agent_dir.exists():
             return False
-        return len(list(AGENT_DIR.glob("*.md"))) > 0
+        return len(list(self.agent_dir.glob("*.md"))) > 0
 
     def run(self):
         print_step("Welcome to the Agent Setup Wizard")
@@ -133,9 +135,9 @@ class SetupWizard:
         self.agents.append(agent_config)
 
     def save_all(self):
-        AGENT_DIR.mkdir(parents=True, exist_ok=True)
+        self.agent_dir.mkdir(parents=True, exist_ok=True)
         for agent in self.agents:
-            file_path = AGENT_DIR / f"{agent['name']}.md"
+            file_path = self.agent_dir / f"{agent['name']}.md"
             content = self._format_md(agent)
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(content)

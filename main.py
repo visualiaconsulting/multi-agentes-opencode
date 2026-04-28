@@ -1,6 +1,9 @@
 import sys
 import argparse
+import shutil
 from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).parent.resolve()
 
 
 def check_dependencies():
@@ -23,14 +26,16 @@ def check_dependencies():
 
 def check_opencode_cli():
     """Check that OpenCode CLI is available"""
-    import shutil
     return shutil.which("opencode") is not None
 
 
-def run_doctor():
+def run_doctor(project_root=None):
     """Diagnose environment issues"""
     import platform
     from cli.ui import console
+
+    if project_root is None:
+        project_root = PROJECT_ROOT
 
     console.print("\n[bold cyan]=== System Diagnostics ===[/bold cyan]\n")
 
@@ -58,7 +63,7 @@ def run_doctor():
         console.print(f"    Install from: [bold]https://opencode.ai[/bold]")
 
     # Agents
-    agent_dir = Path(".opencode/agents")
+    agent_dir = project_root / ".opencode" / "agents"
     if agent_dir.exists():
         agent_count = len(list(agent_dir.glob("*.md")))
         console.print(f"  [green]✔[/green] Agents configured: {agent_count}")
@@ -68,10 +73,14 @@ def run_doctor():
     console.print("\n[bold cyan]==============================[/bold cyan]\n")
 
 
-def load_agents():
+def load_agents(project_root=None):
     """Load agent definitions from .opencode/agents/*.md"""
     import yaml
-    agent_dir = Path(".opencode/agents")
+
+    if project_root is None:
+        project_root = PROJECT_ROOT
+
+    agent_dir = project_root / ".opencode" / "agents"
     agents = []
     if not agent_dir.exists():
         return agents
@@ -95,11 +104,52 @@ def load_agents():
     return agents
 
 
+def install_global(project_root=None):
+    """Copy agent .md files from project .opencode/agents/ to ~/.opencode/agents/"""
+    from cli.ui import console, print_success, print_error
+
+    if project_root is None:
+        project_root = PROJECT_ROOT
+
+    source_dir = project_root / ".opencode" / "agents"
+    target_dir = Path.home() / ".opencode" / "agents"
+
+    if not source_dir.exists():
+        print_error(f"Source agent directory not found: {source_dir}")
+        console.print("[dim]Run the setup wizard first with: python main.py --setup[/dim]")
+        return False
+
+    md_files = list(source_dir.glob("*.md"))
+    if not md_files:
+        print_error("No agent .md files found in source directory.")
+        return False
+
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    copied = 0
+    for md_file in md_files:
+        target_file = target_dir / md_file.name
+        shutil.copy2(md_file, target_file)
+        copied += 1
+        console.print(f"  [green]✔[/green] {md_file.name}")
+
+    print_success(f"Installed {copied} agent(s) globally to {target_dir}")
+    console.print("[dim]Agents are now available from any directory via OpenCode.[/dim]")
+    return True
+
+
 def main():
     parser = argparse.ArgumentParser(description="oh-my-agents — Multi-Agent Orchestration for OpenCode")
     parser.add_argument("--setup", action="store_true", help="Force initial agent configuration")
     parser.add_argument("--doctor", action="store_true", help="Diagnose environment issues")
+    parser.add_argument("--install-global", action="store_true",
+                        help="Copy agent .md files to ~/.opencode/agents/ for global use")
+    parser.add_argument("--dir", type=str, default=None,
+                        help="Explicitly set the project root directory (overrides auto-detection)")
     args = parser.parse_args()
+
+    # Determine project root (--dir flag overrides auto-detection)
+    project_root = Path(args.dir).resolve() if args.dir else PROJECT_ROOT
 
     # Check basic dependencies
     missing = check_dependencies()
@@ -111,14 +161,19 @@ def main():
     from cli.ui import print_header, print_agent_status, console
     from cli.wizard import SetupWizard
 
+    # Install-global mode: copy to ~/.opencode/agents/ and exit
+    if args.install_global:
+        install_global(project_root=project_root)
+        return
+
     # Doctor mode
     if args.doctor:
-        run_doctor()
+        run_doctor(project_root=project_root)
         return
 
     print_header()
 
-    wizard = SetupWizard()
+    wizard = SetupWizard(project_root=project_root)
 
     # Check for existing configuration
     if args.setup or not wizard.check_existing_config():
@@ -140,7 +195,7 @@ def main():
             console.print("\n[dim]You can run the wizard later with: python main.py --setup[/dim]")
             return
 
-    agents = load_agents()
+    agents = load_agents(project_root=project_root)
 
     if agents:
         print_agent_status(agents)

@@ -1,7 +1,7 @@
 ---
 project: oh-my-agents
 plan: go
-version: 1.0
+version: 0.9.3.1
 ---
 
 # Project Context

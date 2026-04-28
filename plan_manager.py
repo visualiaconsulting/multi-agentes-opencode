@@ -101,7 +101,8 @@ class PlanManager:
         "ollama": {"daily": "unlimited", "weekly": "unlimited", "monthly": "unlimited"}
     }
     
-    def __init__(self, plan: Optional[str] = None):
+    def __init__(self, plan: Optional[str] = None, project_root: Optional[Path] = None):
+        self.project_root = project_root or Path(__file__).parent
         self.plan = plan or self._detect_plan()
         self.models = self.PLAN_MODELS.get(self.plan, self.PLAN_MODELS["go"])
         self.limits = self.PLAN_LIMITS.get(self.plan, self.PLAN_LIMITS["go"])
@@ -113,7 +114,7 @@ class PlanManager:
             return env_plan.lower()
         
         # 2. Local configuration file
-        config_path = Path(".opencode/plan.json")
+        config_path = self.project_root / ".opencode" / "plan.json"
         if config_path.exists():
             try:
                 with open(config_path) as f:

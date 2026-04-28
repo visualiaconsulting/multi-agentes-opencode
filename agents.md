@@ -70,6 +70,10 @@ Command-line interface that:
 - Displays the multi-agent system banner
 - Runs the setup wizard (`--setup`) if no agents are defined
 - Loads and displays agent status from `.opencode/agents/*.md`
+- Diagnoses environment issues (`--doctor`)
+- Installs agents globally to `~/.opencode/agents/` (`--install-global`)
+- Supports explicit project root override (`--dir DIR`)
+- Uses `PROJECT_ROOT = Path(__file__).parent.resolve()` for path-independent operation
 
 ### `cli/wizard.py` — Setup Wizard
 
@@ -93,6 +97,32 @@ The **Qwen3.6 Plus** and **Qwen3.5 Plus** models are marked as `deprecated` in t
 ---
 
 ## 📝 Changelog
+
+### v0.9.3.1 — Path Independence & Setup Fixes (April 2026)
+
+**Critical fix:** All Python files now use `Path(__file__).parent` for path resolution instead of relative paths. The system works correctly regardless of the current working directory.
+
+**Files modified:**
+- `main.py` — Added `PROJECT_ROOT` constant, `--install-global`, `--dir` flags, `install_global()` function
+- `cli/wizard.py` — Accepts `project_root` parameter, derives paths from script location (`Path(__file__).resolve().parent.parent`)
+- `plan_manager.py` — Accepts `project_root` parameter for config file detection
+- `setup.ps1` — Fixed ExecutionPolicy guidance, robust Python detection (`py -3` → `python3` → `python`), absolute paths, global install option
+- `setup.sh` — Added `cd` to script directory, absolute paths, `--install-global` flag (checked before main.py runs)
+- `README.md` — Documented new CLI args, global install section, ExecutionPolicy note, changelog entry
+
+**New CLI arguments:**
+| Argument | Description |
+|----------|-------------|
+| `--setup` | Force the setup wizard to reconfigure agents |
+| `--doctor` | Diagnose environment issues (Python, deps, OpenCode CLI, agents) |
+| `--install-global` | Copy agent `.md` files to `~/.opencode/agents/` for global use |
+| `--dir DIR` | Override the auto-detected project root directory |
+
+**How path resolution works now:**
+- `PROJECT_ROOT = Path(__file__).parent.resolve()` in `main.py`
+- `SetupWizard(project_root=...)` passes it to `PlanManager(project_root=...)`
+- All `.opencode/agents/` references use `project_root / ".opencode" / "agents"` instead of `Path(".opencode/agents")`
+- Scripts (`setup.ps1`, `setup.sh`) `cd` to their own directory before doing anything
 
 ### v0.9.2.3 — Full English Translation (April 2026)
 
@@ -226,6 +256,9 @@ Translated all documentation, comments, and user-facing strings from Spanish to 
 | 9 | Validator had `edit/bash: allow` despite being "Read Only" | `validator.md` | Changed to `deny` |
 | 10 | `opencode.jsonc` caused configuration conflicts | `opencode.jsonc` | Removed |
 | 11 | Orchestrator model inconsistent with base project | `orchestrator.md` | Changed to `opencode-go/mimo-v2.5-pro` |
+| 12 | All Python files used relative paths (`Path(".opencode/...")`) — broke when CWD ≠ project root | `main.py`, `wizard.py`, `plan_manager.py` | Changed to `Path(__file__).parent`-based resolution |
+| 13 | `setup.ps1` had no ExecutionPolicy guidance, no `cd` to script dir, only tried `python` | `setup.ps1` | Added `Set-Location $ScriptDir`, `Find-Python` function, ExecutionPolicy comments |
+| 14 | `setup.sh` had no `cd` to script dir, `--install-global` flag checked after `main.py` ran | `setup.sh` | Added `cd "$SCRIPT_DIR"`, moved flag check before `main.py` |
 
 ---
 
@@ -237,6 +270,9 @@ Translated all documentation, comments, and user-facing strings from Spanish to 
 ├── README.md                    # Main project documentation
 ├── plan_manager.py              # Model selection logic
 ├── main.py                      # Multi-agent system CLI
+├── requirements.txt             # Python dependencies
+├── setup.ps1                    # Windows setup script
+├── setup.sh                     # Linux/Mac setup script
 ├── cli/
 │   ├── wizard.py                # Interactive setup wizard
 │   └── ui.py                    # Visual components (rich)
