@@ -61,17 +61,21 @@
 git clone https://github.com/visualiaconsulting/oh-my-agents.git
 cd oh-my-agents
 
-# 2. Run setup (installs deps and configures agents)
+# 2. Run setup (installs deps, configures agents, and installs globally)
 .\setup.ps1        # Windows
 # or
 ./setup.sh         # Linux/Mac
 
-# 3. Start the orchestrator
+# 3. Start the orchestrator — works from ANY folder after global install
 opencode --agent orchestrator
 ```
 
 > **Windows note:** If you get an execution policy error, run:
 > `powershell -ExecutionPolicy Bypass -File setup.ps1`
+>
+> **How agents work:** OpenCode reads `.opencode/` from the current directory.
+> The setup installs agents to `~/.opencode/agents/` so they are available
+> **everywhere** on your system, not just inside this project folder.
 
 ### Copy agents to another project
 
@@ -99,7 +103,7 @@ opencode --agent orchestrator
 
 ### Install globally
 
-To make agents available from **any directory** (not just the cloned repo):
+The setup scripts now install agents globally **by default**. If you skipped it, run:
 
 ```bash
 # From the oh-my-agents directory:
@@ -107,10 +111,12 @@ python main.py --install-global
 
 # Or via the setup scripts:
 .\setup.ps1          # Will prompt for global install at the end
-./setup.sh --install-global  # Linux/Mac one-liner
+./setup.sh           # Linux/Mac — prompts at the end
+./setup.sh --install-global  # Linux/Mac one-liner (CLI wrapper + agents)
 ```
 
 This copies agent definitions to `~/.opencode/agents/`, which OpenCode reads automatically.
+**Without this, `opencode --agent orchestrator` only works when you are inside the cloned project directory.**
 
 ---
 
@@ -186,12 +192,21 @@ oh-my-agents/
 ├── AGENTS.md                    # Detailed agent state & changelog
 ├── plan_manager.py              # Model selection logic per plan
 ├── main.py                      # CLI for the multi-agent system
-├── requirements.txt             # Python dependencies
-├── setup.ps1                    # Windows setup script
-├── setup.sh                     # Linux/Mac setup script
+├── requirements.txt             # Python dependencies (includes pytest)
+├── setup.ps1                    # Windows setup script (global install by default)
+├── setup.sh                     # Linux/Mac setup script (global install by default)
 ├── cli/
+│   ├── __init__.py
 │   ├── wizard.py                # Interactive configuration wizard
 │   └── ui.py                    # Rich terminal UI components
+├── tests/
+│   ├── conftest.py              # Shared fixtures
+│   ├── test_plan_manager.py     # 22 tests: plans, models, validation
+│   ├── test_wizard.py           # 15 tests: defaults, permissions, save
+│   └── test_main.py             # 15 tests: agents, deps, global install
+├── .github/
+│   └── workflows/
+│       └── ci.yml               # CI: test matrix + lint
 └── .opencode/
     ├── context.md               # Global context injected to all agents
     └── agents/
@@ -214,6 +229,17 @@ oh-my-agents/
 ---
 
 ## 📝 Changelog
+
+### v0.9.3.2 — Global Install by Default, Tests, Model Validation & CI (April 2026)
+
+**Setup experience overhaul:** Global install is now the default — agents work from **any folder** after running setup.
+
+- `setup.ps1` / `setup.sh`: Global install prompt changed from `[y/N]` to `[Yn]` with clear explanation
+- `plan_manager.py`: New `validate_models()` method checks agent model IDs against known registry
+- `main.py`: `--doctor` now validates model IDs; improved global install success message
+- `tests/`: 56 unit tests across `plan_manager`, `wizard`, and `main` modules
+- `.github/workflows/ci.yml`: CI pipeline with test matrix (Python 3.8–3.12) + ruff lint
+- `README.md`: Updated Quick Start and global install docs
 
 ### v0.9.3.1 — Path Independence & Setup Fixes (April 2026)
 

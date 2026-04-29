@@ -63,10 +63,21 @@ def run_doctor(project_root=None):
         console.print(f"    Install from: [bold]https://opencode.ai[/bold]")
 
     # Agents
+    from plan_manager import PlanManager
     agent_dir = project_root / ".opencode" / "agents"
     if agent_dir.exists():
         agent_count = len(list(agent_dir.glob("*.md")))
         console.print(f"  [green]✔[/green] Agents configured: {agent_count}")
+
+        pm = PlanManager(project_root=project_root)
+        valid, invalid = pm.validate_models()
+        if invalid:
+            console.print(f"  [red]✖[/red] Invalid model IDs detected:")
+            for name, model in invalid:
+                console.print(f"      @{name} → [red]{model}[/red] (not in registry)")
+            console.print(f"    [dim]Run 'python main.py --setup' to reconfigure.[/dim]")
+        elif valid:
+            console.print(f"  [green]✔[/green] All agent model IDs valid ({len(valid)} models)")
     else:
         console.print(f"  [yellow]⚠[/yellow] No .opencode/agents/ directory found")
 
@@ -134,7 +145,7 @@ def install_global(project_root=None):
         console.print(f"  [green]✔[/green] {md_file.name}")
 
     print_success(f"Installed {copied} agent(s) globally to {target_dir}")
-    console.print("[dim]Agents are now available from any directory via OpenCode.[/dim]")
+    console.print("[dim]Now opencode --agent orchestrator works from ANY folder on your system.[/dim]")
     return True
 
 
@@ -175,7 +186,7 @@ def main():
 
     wizard = SetupWizard(project_root=project_root)
 
-    # Check for existing configuration
+    # Handle --setup flag or first-time (no config) scenario
     if args.setup or not wizard.check_existing_config():
         if args.setup:
             console.print("[yellow]Forced reconfiguration mode...[/yellow]\n")
@@ -195,13 +206,43 @@ def main():
             console.print("\n[dim]You can run the wizard later with: python main.py --setup[/dim]")
             return
 
-    agents = load_agents(project_root=project_root)
+        agents = load_agents(project_root=project_root)
+        if agents:
+            print_agent_status(agents)
+            console.print("\n[bold green]System ready.[/bold green] Use `opencode --agent orchestrator` to get started.")
+        else:
+            console.print("[red]Error: Could not load agents.[/red]")
+        return
 
-    if agents:
-        print_agent_status(agents)
-        console.print("\n[bold green]System ready.[/bold green] Use `opencode --agent orchestrator` to get started.")
-    else:
-        console.print("[red]Error: Could not load agents.[/red]")
+    # Configuration already exists and no direct flags — show interactive menu
+    import questionary
+    while True:
+        choice = questionary.select(
+            "What would you like to do?",
+            choices=[
+                "View agent status",
+                "Run setup wizard",
+                "Run diagnostics",
+                "Install globally",
+                "Exit",
+            ]
+        ).ask()
+
+        if choice is None or choice == "Exit":
+            console.print("\n[dim]Goodbye![/dim]")
+            break
+        elif choice == "View agent status":
+            agents = load_agents(project_root=project_root)
+            if agents:
+                print_agent_status(agents)
+            else:
+                console.print("[red]Error: Could not load agents.[/red]")
+        elif choice == "Run setup wizard":
+            wizard.run()
+        elif choice == "Run diagnostics":
+            run_doctor(project_root=project_root)
+        elif choice == "Install globally":
+            install_global(project_root=project_root)
 
 
 if __name__ == "__main__":

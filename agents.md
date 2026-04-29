@@ -70,7 +70,7 @@ Command-line interface that:
 - Displays the multi-agent system banner
 - Runs the setup wizard (`--setup`) if no agents are defined
 - Loads and displays agent status from `.opencode/agents/*.md`
-- Diagnoses environment issues (`--doctor`)
+- Diagnoses environment issues (`--doctor`) — now includes model ID validation
 - Installs agents globally to `~/.opencode/agents/` (`--install-global`)
 - Supports explicit project root override (`--dir DIR`)
 - Uses `PROJECT_ROOT = Path(__file__).parent.resolve()` for path-independent operation
@@ -97,6 +97,44 @@ The **Qwen3.6 Plus** and **Qwen3.5 Plus** models are marked as `deprecated` in t
 ---
 
 ## 📝 Changelog
+
+### v0.9.3.3 — Interactive Main Menu (April 2026)
+
+**Problem:** Running `python main.py` without flags when agents were already configured would print the status table and exit immediately — no way to interact.
+
+**Solution:** Added an interactive `questionary.select` menu that loops when configuration exists, offering:
+- View agent status
+- Run setup wizard (reconfigure)
+- Run diagnostics (`--doctor`)
+- Install globally (`--install-global`)
+- Exit
+
+CLI flags (`--setup`, `--doctor`, `--install-global`) still bypass the menu and work as direct commands. First-time (no config) still prompts to run the wizard.
+
+**File modified:**
+- `main.py` — Replaced linear flow with interactive menu loop in `main()`
+
+### v0.9.3.2 — Global Install, Tests, Model Validation & CI (April 2026)
+
+**Setup experience overhaul:** Global install is now the default. Agents work from ANY directory after setup — not just inside the project folder.
+
+**Files modified:**
+- `setup.ps1` — Global install prompts `[Yn]` (default yes) with clear explanation of why it matters
+- `setup.sh` — Same improvement for Linux/Mac, renumbered steps to `[5/5]`
+- `main.py` — Improved `install_global()` success message; `--doctor` now validates model IDs
+- `plan_manager.py` — Added `validate_models()` method that checks agent models against the registry
+- `README.md` — Updated Quick Start and global install docs with explanation of agent scope
+
+**New files:**
+- `tests/conftest.py` — Shared fixtures (temp_project, clean_env, mock_questionary)
+- `tests/test_plan_manager.py` — 22 tests: plan detection, model mapping, validate_models()
+- `tests/test_wizard.py` — 15 tests: init, defaults, permissions, save, format_md
+- `tests/test_main.py` — 15 tests: load_agents, dependencies, install_global, doctor
+- `.github/workflows/ci.yml` — CI pipeline: test matrix (Python 3.8–3.12) + ruff lint
+
+**What `--doctor` now detects:**
+- Invalid model IDs in agent `.md` files that don't match any known registry model
+- Reports each mismatched agent and suggests re-running `--setup`
 
 ### v0.9.3.1 — Path Independence & Setup Fixes (April 2026)
 
@@ -259,6 +297,11 @@ Translated all documentation, comments, and user-facing strings from Spanish to 
 | 12 | All Python files used relative paths (`Path(".opencode/...")`) — broke when CWD ≠ project root | `main.py`, `wizard.py`, `plan_manager.py` | Changed to `Path(__file__).parent`-based resolution |
 | 13 | `setup.ps1` had no ExecutionPolicy guidance, no `cd` to script dir, only tried `python` | `setup.ps1` | Added `Set-Location $ScriptDir`, `Find-Python` function, ExecutionPolicy comments |
 | 14 | `setup.sh` had no `cd` to script dir, `--install-global` flag checked after `main.py` ran | `setup.sh` | Added `cd "$SCRIPT_DIR"`, moved flag check before `main.py` |
+| 15 | Global install was opt-in with default [y/N] — most users skipped it, agents only worked inside project | `setup.ps1`, `setup.sh` | Changed to [Yn] (default yes) with explanation of why global install matters |
+| 16 | No automated tests — any refactor could silently break plan detection or wizard | All Python files | Added 56 unit tests covering plan_manager, wizard, and main.py |
+| 17 | Invalid model IDs in agent `.md` files went undetected | `plan_manager.py`, `main.py` | Added `validate_models()` + integrated into `--doctor` |
+| 18 | No CI pipeline — no automatic validation on PRs or pushes | New file | Added `.github/workflows/ci.yml` with test matrix + ruff lint |
+| 19 | `main.py` exited immediately when config existed — no interactive menu | `main.py` | Added interactive `questionary.select` menu loop with 5 options: View status, Run wizard, Run diagnostics, Install globally, Exit |
 
 ---
 
@@ -268,14 +311,24 @@ Translated all documentation, comments, and user-facing strings from Spanish to 
 ./
 ├── AGENTS.md                    # This document (agent status)
 ├── README.md                    # Main project documentation
-├── plan_manager.py              # Model selection logic
+├── plan_manager.py              # Model selection logic + model validation
 ├── main.py                      # Multi-agent system CLI
-├── requirements.txt             # Python dependencies
-├── setup.ps1                    # Windows setup script
-├── setup.sh                     # Linux/Mac setup script
+├── requirements.txt             # Python dependencies (now includes pytest)
+├── setup.ps1                    # Windows setup script (global install by default)
+├── setup.sh                     # Linux/Mac setup script (global install by default)
 ├── cli/
+│   ├── __init__.py
 │   ├── wizard.py                # Interactive setup wizard
 │   └── ui.py                    # Visual components (rich)
+├── tests/
+│   ├── __init__.py
+│   ├── conftest.py              # Shared fixtures
+│   ├── test_plan_manager.py     # 22 tests: plans, models, validation
+│   ├── test_wizard.py           # 15 tests: defaults, permissions, save
+│   └── test_main.py             # 15 tests: agents, deps, global install
+├── .github/
+│   └── workflows/
+│       └── ci.yml               # CI pipeline (test matrix + lint)
 └── .opencode/
     ├── context.md               # Global context injected to all agents
     └── agents/
@@ -315,10 +368,11 @@ print(f"Available models: {pm.get_available_models()}")
 
 ## 🚀 Suggested Next Steps
 
-1. **Connectivity Validation:** Run `python main.py` to verify that the PlanManager correctly detects the environment.
-2. **Delegation Tests:** Use `opencode --agent orchestrator` with a complex task to validate interaction between agents.
-3. **Context Customization:** Update `.opencode/CONTEXT.md` if the project scales to a specific domain.
-4. **Continuous Integration:** Add automatic linters and validators to maintain configuration consistency.
+1. **Run tests locally:** `pytest tests/ -v` (56 tests, all current features covered)
+2. **Connectivity Validation:** Run `python main.py` to verify that the PlanManager correctly detects the environment
+3. **Delegation Tests:** Use `opencode --agent orchestrator` with a complex task to validate interaction between agents (works from any folder after global install)
+4. **Model Health Check:** Run `python main.py --doctor` to verify all agent model IDs are valid
+5. **Context Customization:** Update `.opencode/CONTEXT.md` if the project scales to a specific domain
 
 ---
 

@@ -13,7 +13,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 # 1. Check Python
-echo "[1/4] Checking Python..."
+echo "[1/5] Checking Python..."
 if ! command -v python3 &> /dev/null; then
     if ! command -v python &> /dev/null; then
         echo "  ERROR: Python not found. Install Python 3.8+ from https://python.org"
@@ -28,7 +28,7 @@ PYTHON_VERSION=$($PYTHON_CMD --version 2>&1)
 echo "  OK: $PYTHON_VERSION"
 
 # 2. Install dependencies
-echo "[2/4] Installing dependencies..."
+echo "[2/5] Installing dependencies..."
 $PYTHON_CMD -m pip install -r "$SCRIPT_DIR"/requirements.txt --quiet
 if [ $? -ne 0 ]; then
     echo "  ERROR: Failed to install dependencies"
@@ -37,7 +37,7 @@ fi
 echo "  OK: Dependencies installed"
 
 # 3. Check OpenCode CLI
-echo "[3/4] Checking OpenCode CLI..."
+echo "[3/5] Checking OpenCode CLI..."
 if command -v opencode &> /dev/null; then
     echo "  OK: OpenCode CLI found"
 else
@@ -48,7 +48,7 @@ fi
 
 # 4. Handle --install-global flag (checked BEFORE running main.py)
 if [ "$1" = "--install-global" ]; then
-    echo "[4/4] Installing globally..."
+    echo "[4/5] Installing CLI globally..."
     TARGET="/usr/local/bin/oh-my-agents"
 
     # Fall back to ~/.local/bin if /usr/local/bin doesn't exist
@@ -68,17 +68,38 @@ GLOBALEOF
 fi
 
 # 5. Run CLI (interactive mode)
-echo "[4/4] Starting system..."
+echo "[4/5] Starting system..."
 echo ""
 $PYTHON_CMD main.py
 
-# 6. Suggest global install for future use
+# 6. Global install (makes agents available from any directory)
+echo ""
+echo "[5/5] Global install..."
+echo ""
+echo "  OpenCode looks for .opencode/ in the current directory by default."
+echo "  Without a global install, agents only work when you are inside this project."
+echo ""
+echo "  Global install copies agent definitions to ~/.opencode/agents/ so"
+echo "  opencode --agent orchestrator works from ANY folder on your system."
+echo ""
+
+read -p "  Install agents globally? [Y/n] " -r
+if [[ $REPLY =~ ^$|^[Yy]$ ]]; then
+    echo ""
+    $PYTHON_CMD main.py --install-global
+    if [ $? -ne 0 ]; then
+        echo "  WARNING: Global install reported an error. Check the output above."
+    fi
+else
+    echo ""
+    echo "  Skipped. Agents will only work inside this project directory."
+    echo "  Run later: python main.py --install-global"
+fi
+
 echo ""
 echo "========================================"
-echo "  Tip: Install globally?"
+echo "  Setup complete!"
 echo "========================================"
 echo ""
-echo "Run the following to install oh-my-agents globally:"
-echo ""
-echo "  ./setup.sh --install-global"
+echo "  Run: opencode --agent orchestrator"
 echo ""

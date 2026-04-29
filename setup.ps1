@@ -148,22 +148,29 @@ try {
 }
 
 # ---------------------------------------------------------------------------
-# 5. Offer global install (makes agents available from any directory)
+# 5. Global install (makes agents available from any directory)
 # ---------------------------------------------------------------------------
 Write-Host ""
-Write-Host "[5/5] Global install (optional)..." -ForegroundColor Yellow
-Write-Host "  Copy agent definitions to ~/.opencode/agents/ so they are available"
-Write-Host "  from any project directory via OpenCode."
+Write-Host "[5/5] Global install..." -ForegroundColor Yellow
+Write-Host ""
+Write-Host "  OpenCode looks for .opencode/ in the current directory by default."
+Write-Host "  Without a global install, agents only work when you are inside this project."
+Write-Host ""
+Write-Host "  Global install copies agent definitions to ~/.opencode/agents/ so"
+Write-Host "  opencode --agent orchestrator works from ANY folder on your system."
+Write-Host ""
 
-$installGlobal = Read-Host "  Run global install? [y/N]"
-if ($installGlobal -match '^[yY]') {
+$installGlobal = Read-Host "  Install agents globally? [Yn]"
+if ($installGlobal -eq '' -or $installGlobal -match '^[yY]') {
     Write-Host ""
     & $PythonCmd main.py --install-global
     if ($LASTEXITCODE -ne 0) {
         Write-Host "  WARNING: Global install reported an error. Check the output above." -ForegroundColor Yellow
     }
 } else {
-    Write-Host "  Skipped. You can run it later with: python main.py --install-global"
+    Write-Host ""
+    Write-Host "  [dim]Skipped. Agents will only work inside this project directory.[/dim]" -ForegroundColor Gray
+    Write-Host "  [dim]Run later: python main.py --install-global[/dim]" -ForegroundColor Gray
 }
 
 Write-Host ""
@@ -171,5 +178,5 @@ Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "  Setup complete!" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  Next step: opencode --agent orchestrator" -ForegroundColor White
+Write-Host "  Run: opencode --agent orchestrator" -ForegroundColor White
 Write-Host ""
