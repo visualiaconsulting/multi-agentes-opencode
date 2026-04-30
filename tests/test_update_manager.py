@@ -38,35 +38,23 @@ class TestVersionGreater:
         assert _version_greater("1.2.1", "1.2.1") is False
 
     def test_fallback_without_packaging(self):
-        """Simulate packaging.version not being available."""
-        try:
-            import packaging  # noqa: F401
-            _packaging_installed = True
-        except ImportError:
-            _packaging_installed = False
+        """The fallback tuple comparison works when packaging is unavailable."""
+        import builtins
+        real_import = builtins.__import__
 
-        # Force the import of packaging.version to fail
-        save = {}
-        keys_to_stub = ["packaging.version", "packaging"]
-        for k in keys_to_stub:
-            if k in __import__("sys").modules:
-                save[k] = __import__("sys").modules[k]
-            __import__("sys").modules[k] = None
+        def fake_import(name, *args, **kwargs):
+            if name == "packaging.version" or name == "packaging":
+                raise ImportError(f"No module named '{name}'")
+            return real_import(name, *args, **kwargs)
 
-        try:
-            # Must reimport to bypass any cached successful import
-            import update_manager
+        with patch("builtins.__import__", side_effect=fake_import):
             import importlib
+            import update_manager
             importlib.reload(update_manager)
             result = update_manager._version_greater("2.0.0", "1.9.9")
             assert result is True
-        finally:
-            # Restore
-            for k, v in save.items():
-                if v is None:
-                    __import__("sys").modules.pop(k, None)
-                else:
-                    __import__("sys").modules[k] = v
+            result2 = update_manager._version_greater("1.0.0", "1.0.1")
+            assert result2 is False
 
 
 class TestCheckForUpdates:

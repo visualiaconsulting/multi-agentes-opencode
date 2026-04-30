@@ -3,7 +3,6 @@ utils.py — Cross-platform helpers for oh-my-agents
 
 Windows-first, Linux-ready. All path operations use pathlib for portability.
 """
-import os
 import sys
 import json
 import uuid
@@ -97,7 +96,10 @@ def format_timestamp(dt: Optional[datetime] = None) -> str:
 
 def parse_timestamp(ts_str: str) -> datetime:
     """Parse a timestamp string back to datetime."""
-    return datetime.strptime(ts_str, "%Y-%m-%d %H:%M:%S")
+    try:
+        return datetime.strptime(ts_str, "%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        return datetime.min
 
 
 def is_windows() -> bool:
@@ -109,7 +111,7 @@ def get_shell_config_file() -> Path:
     """Return the path to the shell config file for the current platform."""
     if is_windows():
         return Path.home() / ".opencode" / "config.json"
-    return Path.home() / ".opencode" / "config.json"
+    return Path.home() / ".config" / "opencode" / "config.json"
 
 
 def safe_json_load(filepath: Path, default=None):
@@ -133,3 +135,54 @@ def truncate_text(text: str, max_length: int = 200) -> str:
     if len(text) <= max_length:
         return text
     return text[:max_length - 3] + "..."
+
+
+def inject_markdown_section(content: str, marker: str, new_content: str) -> str:
+    """Inject or replace a marked section in markdown content.
+
+    If `marker` exists, replaces everything from the marker to the
+    next `---` separator or end-of-file. If not, appends new_content
+    at the end.
+
+    Returns the updated content.
+    """
+    import re
+    if marker in content:
+        content = re.sub(
+            rf"{re.escape(marker)}.*?(?=---\n|$)",
+            new_content.rstrip(),
+            content,
+            flags=re.DOTALL,
+        )
+    else:
+        content = content.rstrip() + "\n\n" + new_content.rstrip()
+    return content
+
+
+def update_context_md_file(project_root: Path, section_marker: str, section_content: str) -> bool:
+    """Update .opencode/context.md with a new section.
+
+    Reads the file, injects/replaces the section identified by section_marker
+    with section_content, and writes it back.
+
+    Returns True if the file was updated, False if context.md doesn't exist.
+    """
+    context_file = get_opencode_dir(project_root) / "context.md"
+    if not context_file.exists():
+        return False
+
+    try:
+        content = context_file.read_text(encoding="utf-8")
+    except OSError:
+        return False
+
+    if not section_content:
+        return False
+
+    content = inject_markdown_section(content, section_marker, section_content)
+
+    try:
+        context_file.write_text(content, encoding="utf-8")
+        return True
+    except OSError:
+        return False

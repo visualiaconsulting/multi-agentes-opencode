@@ -1,4 +1,4 @@
-# config/plan_manager.py
+# plan_manager.py
 """
 Plan Manager — Detects the active OpenCode plan and adapts agent configuration
 """
@@ -219,7 +219,9 @@ class PlanManager:
         """Generates a configuration snippet for opencode.json"""
         return {
             "plan": self.plan,
-            "models": {role: self.get_model(role) for role in ["orchestrator", "code-analyst", "validator", "bulk-processor"]},
+            "models": {role: self.get_model(role) for role in 
+             ["orchestrator", "code-analyst", "validator", "bulk-processor",
+              "subagent", "summarizer", "frontend", "ml-specialist"]},
             "limits": self.limits,
             "requires_api_keys": self.plan == "api",
             "auto_fallback": True

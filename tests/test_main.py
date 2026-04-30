@@ -64,7 +64,7 @@ class TestCheckDependencies:
         assert missing == []
 
     def test_missing_yaml(self):
-        with patch.dict(sys.modules, {"yaml": None}):
+        with patch.dict("sys.modules", {"yaml": None}):
             import builtins
             real_import = builtins.__import__
 
@@ -74,9 +74,10 @@ class TestCheckDependencies:
                 return real_import(name, *args, **kwargs)
 
             with patch("builtins.__import__", side_effect=fake_import):
-                from importlib import reload
+                # Reset the module cache for main to force re-evaluation
+                import importlib
                 import main
-                reload(main)
+                importlib.reload(main)
                 missing = main.check_dependencies()
                 assert "PyYAML" in missing
 

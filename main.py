@@ -26,6 +26,10 @@ def check_dependencies():
         import rich
     except ImportError:
         missing.append("rich")
+    try:
+        import requests
+    except ImportError:
+        missing.append("requests")
     return missing
 
 
@@ -71,8 +75,7 @@ def run_doctor(working_root=None):
         agent_count = len(list(agent_dir.glob("*.md")))
         console.print(f"  [green]✔[/green] Agents configured: {agent_count}")
 
-        plan_root = agent_dir.parent.parent
-        pm = PlanManager(project_root=plan_root)
+        pm = PlanManager(project_root=working_root)
         valid, invalid = pm.validate_models()
         if invalid:
             console.print(f"  [red]✖[/red] Invalid model IDs detected:")

@@ -111,7 +111,7 @@ Manages skills from the skills.sh ecosystem:
 
 ### `cli/wizard.py` — Setup Wizard
 
-Interactive wizard that proposes default configurations or guides the user through manual agent creation. Assigns `opencode-go/mimo-v2.5-pro` to the orchestrator by default.
+Interactive wizard that proposes default configurations or guides the user through manual agent creation. Assigns `opencode-go/kimi-k2.6` to the orchestrator by default.
 
 ### `cli/ui.py` — User Interface
 
@@ -467,6 +467,10 @@ Translated all documentation, comments, and user-facing strings from Spanish to 
 ├── main.py                      # Multi-agent system CLI
 ├── session_manager.py           # Session logging and continuity
 ├── skill_registry.py            # Skills download and management
+├── mcp_client.py                # MCP protocol client (JSON-RPC 2.0 over stdio)
+├── mcp_config.py                # MCP configuration manager
+├── skill_recommender.py         # Auto-skill recommendation engine
+├── skills_catalog.json          # Built-in skills catalog (9 skills)
 ├── update_manager.py            # Automatic update system
 ├── VERSION                      # Current version tracker
 ├── utils.py                     # Cross-platform helpers
@@ -481,9 +485,11 @@ Translated all documentation, comments, and user-facing strings from Spanish to 
 ├── tests/
 │   ├── __init__.py
 │   ├── conftest.py              # Shared fixtures
-│   ├── test_plan_manager.py     # 22 tests: plans, models, validation
-│   ├── test_wizard.py           # 15 tests: defaults, permissions, save
-│   └── test_main.py             # 15 tests: agents, deps, global install, uninstall
+│   ├── test_plan_manager.py     # 29 tests: plans, models, validation
+│   ├── test_wizard.py           # 22 tests: defaults, permissions, save
+│   ├── test_main.py             # 15 tests: agents, deps, global install, uninstall
+│   ├── test_update_manager.py   # 10 tests: version, updates, merge
+│   └── test_mcp.py              # 10 tests: MCP config, client, recommender
 ├── .github/
 │   └── workflows/
 │       └── ci.yml               # CI pipeline (test matrix + lint)
@@ -520,7 +526,7 @@ print(f"Available models: {pm.get_available_models()}")
 | **Go** (default) | Default or `OPENCODE_PLAN=go` | `opencode-go/kimi-k2.6` |
 | **Zen** | `GITHUB_TOKEN` or `COPILOT_TOKEN` | `opencode/claude-sonnet-4.5` |
 | **API** | `ANTHROPIC_API_KEY` | `anthropic/claude-sonnet-4` (configurable) |
-| **Enterprise** | `OPENCODE_PLAN=enterprise` | `opencode-go/mimo-v2.5-pro` (configurable) |
+| **Enterprise** | `OPENCODE_PLAN=enterprise` | `opencode-go/kimi-k2.6` (configurable) |
 | **OpenRouter** | `OPENROUTER_API_KEY` | `openrouter/anthropic/claude-sonnet-4.5` (configurable) |
 | **Copilot** | Active GitHub Copilot | `copilot/claude-sonnet-4` |
 | **Ollama** | `OLLAMA_HOST` or Ollama running | `ollama/llama3.3:70b` (configurable) |
@@ -529,7 +535,7 @@ print(f"Available models: {pm.get_available_models()}")
 
 ## 🚀 Suggested Next Steps
 
-1. **Run tests locally:** `pytest tests/ -v` (66 tests, all current features covered)
+1. **Run tests locally:** `pytest tests/ -v` (86 tests, all current features covered)
 2. **Connectivity Validation:** Run `python main.py` to verify that the PlanManager correctly detects the environment
 3. **Delegation Tests:** Use `opencode --agent orchestrator` with a complex task to validate interaction between agents (works from any folder after global install)
 4. **Model Health Check:** Run `python main.py --doctor` to verify all agent model IDs are valid

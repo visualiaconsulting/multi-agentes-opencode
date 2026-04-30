@@ -32,7 +32,7 @@
 
 | Idea | Descripción |
 |------|-------------|
-| **Auto-detección de skills** | Analizar `package.json`, `requirements.txt`, `Cargo.toml` y sugerir skills automáticamente |
+| **Auto-detección de skills** | ~~Analizar `package.json`, `requirements.txt`, `Cargo.toml` y sugerir skills automáticamente~~ → Implemented in v1.5.0 as `skill_recommender.py` ✅ |
 | **Skills locales** | Permitir que el usuario cree sus propias skills en `.opencode/skills/custom/` |
 | **Skill bundles** | Agrupar skills por stack (ej: "React Stack" = React + Tailwind + shadcn) |
 | **Skills versioning** | Actualizar skills instaladas cuando hay nuevas versiones en skills.sh |
@@ -90,7 +90,7 @@
 
 | Prioridad | Idea | Esfuerzo | Impacto |
 |:---------:|------|:--------:|:-------:|
-| 1 | Auto-detección de skills por proyecto | Bajo | Alto |
+| 1 | ~~Auto-detección de skills por proyecto~~ → Implemented in v1.5.0 as `skill_recommender.py` ✅ | Bajo | Alto |
 | 2 | Resumen automático al cerrar OpenCode | Bajo | Alto |
 | 3 | Skills locales custom | Medio | Medio |
 | 4 | `--session-diff` entre sesiones | Medio | Medio |

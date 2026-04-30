@@ -9,3 +9,9 @@ __pycache__/
 .DS_Store
 dist/
 build/
+
+# Runtime MCP config (may contain tokens)
+.opencode/mcp.json
+
+# Test artifacts
+.pytest_cache/

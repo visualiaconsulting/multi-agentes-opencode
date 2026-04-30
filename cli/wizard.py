@@ -1,7 +1,6 @@
 import os
 import questionary
 from pathlib import Path
-from rich.prompt import Prompt, Confirm
 from cli.ui import console, print_step, print_success, print_error
 from plan_manager import PlanManager
 

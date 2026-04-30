@@ -5,8 +5,6 @@ Downloads, installs, and manages skills from skills.sh ecosystem.
 Skills are stored in .opencode/skills/ as markdown files.
 """
 import re
-import json
-import shutil
 from pathlib import Path
 from typing import Optional
 
@@ -88,18 +86,6 @@ class SkillRegistry:
                 return f.read()
         except OSError:
             return None
-
-    def install_from_catalog(self, skill_id: str) -> bool:
-        """Install a skill from the built-in catalog by ID."""
-        from skill_recommender import SkillRecommender
-        recommender = SkillRecommender(project_root=self.project_root)
-        for skill in recommender.catalog:
-            if skill.get("id") == skill_id:
-                source = skill.get("source", "")
-                if source:
-                    return self.install_skill(source)
-                return False
-        return False
 
     def inject_skills_context(self, skill_names: Optional[list] = None) -> str:
         """Generate a context string with active skills.
@@ -254,13 +240,14 @@ class SkillRegistry:
 
     def _parse_skill_header(self, content: str) -> dict:
         """Parse YAML-like header from skill markdown."""
-        metadata = {}
-        if content.startswith("---"):
-            parts = content.split("---", 2)
-            if len(parts) >= 3:
-                header = parts[1].strip()
-                for line in header.splitlines():
-                    if ":" in line:
-                        key, _, value = line.partition(":")
-                        metadata[key.strip().lower()] = value.strip()
-        return metadata
+        if not content.startswith("---"):
+            return {}
+        parts = content.split("---", 2)
+        if len(parts) < 3:
+            return {}
+        try:
+            import yaml
+            metadata = yaml.safe_load(parts[1])
+            return metadata if isinstance(metadata, dict) else {}
+        except (yaml.YAMLError, Exception):
+            return {}

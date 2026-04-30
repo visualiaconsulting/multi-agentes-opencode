@@ -115,6 +115,17 @@ class SkillRecommender:
             pass
         return False
 
+    def install_from_catalog(self, skill_id: str) -> bool:
+        """Install a skill from the built-in catalog by ID."""
+        sr = SkillRegistry(project_root=self.project_root)
+        for skill in self.catalog:
+            if skill.get("id") == skill_id:
+                source = skill.get("source", "")
+                if source:
+                    return sr.install_skill(source)
+                return False
+        return False
+
     def get_recommendations(self, limit: int = 5) -> List[dict]:
         """Get top N recommended skills."""
         matches = self.analyze_project()

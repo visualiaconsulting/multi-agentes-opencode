@@ -4,11 +4,8 @@ session_manager.py — Session bitacora and continuity for oh-my-agents
 Manages session logs, saves session summaries, and injects context
 for continuity between OpenCode sessions.
 """
-import os
 import re
-import json
 from pathlib import Path
-from datetime import datetime
 from typing import Optional
 
 from utils import (

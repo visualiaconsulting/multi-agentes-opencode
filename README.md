@@ -6,7 +6,7 @@
 
 [![OpenCode](https://img.shields.io/badge/Built_for-OpenCode_Go-00D4AA?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTVNMiAxN2wxMCA1IDEwLTVNMiAxMmwxMCA1IDEwLTUiLz48L3N2Zz4=)](https://opencode.ai)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-1.3.3-blue?style=for-the-badge)](https://github.com/visualiaconsulting/oh-my-agents/releases/tag/v1.3.3)
+[![Version](https://img.shields.io/badge/version-1.5.0-blue?style=for-the-badge)](https://github.com/visualiaconsulting/oh-my-agents/releases/tag/v1.5.0)
 [![GitHub Stars](https://img.shields.io/github/stars/visualiaconsulting/oh-my-agents?style=for-the-badge&logo=github)](https://github.com/visualiaconsulting/oh-my-agents/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/visualiaconsulting/oh-my-agents?style=for-the-badge&logo=github)](https://github.com/visualiaconsulting/oh-my-agents/issues)
 
@@ -480,7 +480,7 @@ print(f"Available models: {pm.get_available_models()}")
 | **Go** (default) | Default or `OPENCODE_PLAN=go` | `opencode-go/kimi-k2.6` |
 | **Zen** | `GITHUB_TOKEN` or `COPILOT_TOKEN` | `opencode/claude-sonnet-4.5` |
 | **API** | `ANTHROPIC_API_KEY` | `anthropic/claude-sonnet-4` (configurable) |
-| **Enterprise** | `OPENCODE_PLAN=enterprise` | `opencode-go/mimo-v2.5-pro` (configurable) |
+| **Enterprise** | `OPENCODE_PLAN=enterprise` | `opencode-go/kimi-k2.6` (configurable) |
 | **OpenRouter** | `OPENROUTER_API_KEY` | `openrouter/anthropic/claude-sonnet-4.5` (configurable) |
 | **Copilot** | Active GitHub Copilot | `copilot/claude-sonnet-4` |
 | **Ollama** | `OLLAMA_HOST` or Ollama running | `ollama/llama3.3:70b` (configurable) |
@@ -595,7 +595,7 @@ oh-my-agents/
 **Other improvements:**
 - `--dir` now explicitly defines `WORKING_ROOT` (not `SYSTEM_ROOT`)
 - All `session_manager.py` and `skill_registry.py` operations use `project_root` parameter
-- Tests updated to reflect new path behavior (66 tests passing)
+- Tests updated to reflect new path behavior (86 tests passing)
 
 ### v1.2.0 — 8 Agents with Benchmark-Optimized Models (April 2026)
 
