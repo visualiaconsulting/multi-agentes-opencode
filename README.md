@@ -6,6 +6,7 @@
 
 [![OpenCode](https://img.shields.io/badge/Built_for-OpenCode_Go-00D4AA?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTVNMiAxN2wxMCA1IDEwLTVNMiAxMmwxMCA1IDEwLTUiLz48L3N2Zz4=)](https://opencode.ai)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![Version](https://img.shields.io/badge/version-1.1.1-blue?style=for-the-badge)](https://github.com/visualiaconsulting/oh-my-agents/releases/tag/v1.1.1)
 [![GitHub Stars](https://img.shields.io/github/stars/visualiaconsulting/oh-my-agents?style=for-the-badge&logo=github)](https://github.com/visualiaconsulting/oh-my-agents/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/visualiaconsulting/oh-my-agents?style=for-the-badge&logo=github)](https://github.com/visualiaconsulting/oh-my-agents/issues)
 
@@ -13,7 +14,7 @@
 
 *oh-my-agents* gives you a production-ready **orchestrator-specialists architecture** for [OpenCode](https://opencode.ai). One orchestrator analyzes your tasks, breaks them down, and delegates to specialized sub-agents — each with the right model and permissions for the job.
 
-[Quick Start](#-quick-start) · [Agents](#-agents) · [Examples](#-examples) · [Configuration](#%EF%B8%8F-planmanager) · [Contributing](#-contributing)
+[Quick Start](#-quick-start) · [Agents](#-agents) · [Session Management](#-session-management) · [Skills System](#-skills-system) · [Examples](#-examples) · [Configuration](#%EF%B8%8F-planmanager) · [Contributing](#-contributing)
 
 ---
 
@@ -24,9 +25,11 @@
 | Feature | Description |
 |---------|-------------|
 | 🧠 **Smart Orchestration** | The orchestrator analyzes complex tasks, decomposes them, and delegates to the right specialist |
-| 🎯 **Specialist Agents** | Each agent has a focused role: coding, QA validation, data processing, debugging |
+| 🎯 **Specialist Agents** | Each agent has a focused role: coding, QA validation, data processing, debugging, session analysis |
 | 🔐 **Least-Privilege Permissions** | Validator is read-only. Orchestrator only delegates. Code-analyst writes and executes. |
-| 🔄 **Multi-Plan Support** | Works with OpenCode Go, Zen, API, and Enterprise plans via `PlanManager` |
+| 📝 **Session Continuity** | Never lose context between sessions. Automatic bitacora saves errors, changes, and pending tasks |
+| 🧩 **Skills Ecosystem** | Extend agent capabilities with reusable skills from [skills.sh](https://skills.sh) |
+| 🔄 **Multi-Plan Support** | Works with OpenCode Go, Zen, API, Enterprise, OpenRouter, Copilot, and Ollama via `PlanManager` |
 | 🚀 **Zero Config Start** | Clone, run setup, start coding. The wizard handles the rest |
 | 📦 **Portable** | Copy agents to any project — they adapt via `context.md` |
 
@@ -41,8 +44,9 @@
 | **@validator** | `kimi-k2.6` | 🔍 QA Specialist — validates quality, reviews code | `read` only |
 | **@bulk-processor** | `deepseek-v4-flash` | ⚡ Data Processor — handles repetitive, high-volume tasks (hidden) | `edit` `bash` `read` |
 | **@subagent** | `glm-5.1` | 🛠️ Debugger — auxiliary tasks and fallback agent | `edit` `bash` `read` |
+| **@summarizer** | `minimax-m2.5` | 📊 Session Analyst — summarizes sessions, analyzes project state | `edit` `bash` `read` |
 
-> **How it works:** You give a task to `@orchestrator`. It analyzes, plans, and delegates to the right specialist(s). The validator checks quality before returning results.
+> **How it works:** You give a task to `@orchestrator`. It analyzes, plans, and delegates to the right specialist(s). The validator checks quality before returning results. After the session, `@summarizer` can analyze logs and save a continuity record.
 
 ---
 
@@ -51,17 +55,17 @@
 ### Prerequisites
 
 - [OpenCode CLI](https://opencode.ai) installed
-- Active **OpenCode Go** subscription
+- Active **OpenCode Go** subscription (or any supported plan)
 - API key configured via `/connect` or environment variable
 
-### Install (3 steps)
+### Option A: Full Setup (recommended for first time)
 
 ```bash
 # 1. Clone the repository
 git clone https://github.com/visualiaconsulting/oh-my-agents.git
 cd oh-my-agents
 
-# 2. Run setup (installs deps and configures agents)
+# 2. Run setup (installs deps, configures agents, installs globally)
 .\setup.ps1        # Windows
 # or
 ./setup.sh         # Linux/Mac
@@ -73,17 +77,24 @@ opencode --agent orchestrator
 > **Windows note:** If you get an execution policy error, run:
 > `powershell -ExecutionPolicy Bypass -File setup.ps1`
 
-### Copy agents to another project
+### Option B: Quick Install (for new machines)
 
 ```bash
-# Create agents directory in your project
-mkdir -p myproject/.opencode/agents
+git clone https://github.com/visualiaconsulting/oh-my-agents.git
+cd oh-my-agents
+.\install.ps1      # Windows only
+```
 
-# Copy agent definitions
-cp .opencode/agents/*.md myproject/.opencode/agents/
+This installs dependencies and agents globally in one step — no interactive wizard.
+
+### Option C: Clone & Go (use agents in another project)
+
+```bash
+# Copy agents to your project
+cp -r .opencode/agents/ myproject/.opencode/agents/
 
 # Create a context.md for your project
-cat > myproject/.opencode/CONTEXT.md << 'EOF'
+cat > myproject/.opencode/context.md << 'EOF'
 ---
 project: My Project
 plan: go
@@ -97,20 +108,237 @@ cd myproject
 opencode --agent orchestrator
 ```
 
-### Install globally
+### Install Globally
 
 To make agents available from **any directory** (not just the cloned repo):
 
 ```bash
 # From the oh-my-agents directory:
 python main.py --install-global
-
-# Or via the setup scripts:
-.\setup.ps1          # Will prompt for global install at the end
-./setup.sh --install-global  # Linux/Mac one-liner
 ```
 
-This copies agent definitions to `~/.opencode/agents/`, which OpenCode reads automatically.
+This copies agent definitions to `~/.opencode/agents/`, which OpenCode reads automatically. The setup script does this automatically in step 5.
+
+---
+
+## 📝 Session Management
+
+### What is it?
+
+Session management ensures you **never lose context** between OpenCode sessions. When you work on a project, close OpenCode, and come back later, the system remembers:
+
+- What was accomplished in the last session
+- Errors that occurred and how they were handled
+- Files that were modified
+- Pending tasks that need attention
+- Decisions made during the session
+
+### How it works
+
+```
+OpenCode Session → .opencode/logs/ → session_manager.py → .opencode/sessions/ → context.md
+                                                                    ↓
+                                                          Next session reads
+                                                          context.md for continuity
+```
+
+1. **During your session:** OpenCode writes logs to `.opencode/logs/`
+2. **After your session:** Run `python main.py --summarize` to scan those logs
+3. **The system:** Extracts errors, file changes, commands run, and saves a JSON record
+4. **Context injection:** The last 3 sessions are automatically injected into `context.md`
+5. **Next session:** The orchestrator reads `context.md` and knows exactly where you left off
+
+### Commands
+
+| Command | Description |
+|---------|-------------|
+| `python main.py --summarize` | Scan logs and save the current session record |
+| `python main.py --sessions` | List all recorded sessions in a table |
+| `python main.py --session-status` | Show a detailed summary of the last session |
+| `python main.py --session <id>` | Show details of a specific session by ID |
+
+### Example workflow
+
+```bash
+# After finishing work in OpenCode:
+python main.py --summarize
+
+# Output:
+# ✔ Session saved: a3f8b2c1
+#   Files changed: 12
+#   Errors found: 2
+#   Context updated in .opencode/context.md
+
+# Later, check what was done:
+python main.py --session-status
+
+# Output:
+# === Last Session ===
+# Session: a3f8b2c1
+# Time:    2026-04-29 14:32:00
+# Agent:   @summarizer
+#
+# Summary: Auto-summarized session. 12 files changed, 2 errors found.
+#
+# Errors (2):
+#   • TypeError: cannot read property 'x' of undefined
+#   • Failed to compile src/components/Header.tsx
+#
+# Files Changed (12):
+#   • src/components/Header.tsx
+#   • src/utils/api.ts
+#   • ...
+```
+
+### Session data format
+
+Each session is saved as JSON in `.opencode/sessions/<id>.json`:
+
+```json
+{
+  "session_id": "a3f8b2c1",
+  "timestamp": "2026-04-29 14:32:00",
+  "agent": "summarizer",
+  "summary": "Auto-summarized session...",
+  "errors": ["TypeError: ..."],
+  "pending_tasks": ["Fix header responsive layout"],
+  "files_changed": ["src/components/Header.tsx"],
+  "commands_run": ["npm run build"],
+  "warnings": ["Deprecated API usage"]
+}
+```
+
+### @summarizer agent
+
+The `@summarizer` is a lightweight agent (`opencode-go/minimax-m2.5`) designed for session analysis. When delegated by the orchestrator at the end of a session, it:
+
+1. Reads the session logs
+2. Identifies key accomplishments and errors
+3. Notes pending tasks
+4. Writes the session summary
+5. Suggests improvements to `agents.md` if relevant
+6. Can download skills from skills.sh if requested
+
+---
+
+## 🧩 Skills System
+
+### What are skills?
+
+Skills are **reusable capabilities** for AI agents. They provide procedural knowledge, best practices, and domain-specific guidance that agents can reference during their work.
+
+The skills ecosystem is managed by [skills.sh](https://skills.sh). Browse available skills at [skills.sh](https://skills.sh) and read the documentation at [skills.sh/docs](https://skills.sh/docs).
+
+### How it works
+
+```
+skills.sh (registry) → skill_registry.py → .opencode/skills/ → context.md → Agents
+```
+
+1. **Search:** Find skills on skills.sh by topic
+2. **Install:** Download the skill's `.md` file from GitHub to `.opencode/skills/`
+3. **Inject:** The skill content is automatically added to `context.md`
+4. **Use:** All agents see the skill as part of their context and can reference it
+
+### Commands
+
+| Command | Description |
+|---------|-------------|
+| `python main.py --skills` | List all installed skills |
+| `python main.py --skills-search <query>` | Search skills.sh for available skills |
+| `python main.py --skills-install <owner/repo/name>` | Install a skill from skills.sh |
+| `python main.py --skills-remove <name>` | Remove an installed skill |
+
+### Example: Installing a database skill
+
+```bash
+# 1. Search for database-related skills
+python main.py --skills-search database
+
+# Output:
+# Skills Search: 'database'
+# #  Name                         Repo
+# 1  neon-postgres                neondatabase/agent-skills
+# 2  prisma-database-setup        prisma/skills
+# 3  postgres                     planetscale/database-skills
+# 4  database-migration           wshobson/agents
+# ...
+# Install with: python main.py --skills-install owner/repo/name
+
+# 2. Install the Neon Postgres skill
+python main.py --skills-install neondatabase/agent-skills/neon-postgres
+
+# Output:
+# ✔ Skill 'neon-postgres' installed to .opencode/skills/
+
+# 3. Verify installation
+python main.py --skills
+
+# Output:
+# Installed Skills
+# Name           Description              Source
+# neon-postgres  Best practices for Neon  neondatabase/agent-skills
+```
+
+### Skill file format
+
+Skills are markdown files with a YAML header:
+
+```markdown
+---
+name: neon-postgres
+description: Best practices for Neon Postgres
+source: neondatabase/agent-skills
+---
+
+# Neon Postgres Best Practices
+
+When working with Neon Postgres:
+
+1. **Connection pooling:** Always use PgBouncer or the built-in pooler
+2. **Read replicas:** Enable for read-heavy workloads
+3. **Branching:** Use database branching for safe schema changes
+4. **Migrations:** Run migrations during low-traffic periods
+
+## Connection String Format
+
+postgresql://user:password@host:port/database?sslmode=require
+
+## Common Pitfalls
+
+- Don't exceed connection limits on free tier
+- Branch resets after 30 days of inactivity
+```
+
+### How skills are injected
+
+When a skill is installed, its content is appended to `context.md` under the `## Active Skills` section. Every agent that reads `context.md` (which is all of them) automatically has access to the skill's knowledge.
+
+```markdown
+# context.md
+---
+project: my-app
+plan: go
+version: 1.0
+---
+
+## Active Skills
+
+### Skill: neon-postgres
+
+*Best practices for Neon Postgres*
+
+# Neon Postgres Best Practices
+...
+```
+
+### Removing a skill
+
+```bash
+python main.py --skills-remove neon-postgres
+```
+
+This deletes the `.md` file from `.opencode/skills/`. The next `--summarize` run will update `context.md` to remove the skill reference.
 
 ---
 
@@ -152,6 +380,25 @@ The orchestrator:
 4. Asks `@validator` to run and validate tests
 5. Returns consolidated results
 
+### Session continuity workflow
+
+```bash
+# Day 1: Work on a feature
+opencode --agent orchestrator
+# ... work for 2 hours ...
+# Exit OpenCode
+
+# Save the session
+python main.py --summarize
+
+# Day 2: Resume work
+opencode --agent orchestrator
+# The orchestrator reads context.md and knows:
+# - What was done yesterday
+# - What errors occurred
+# - What is still pending
+```
+
 ---
 
 ## ⚙️ PlanManager
@@ -175,6 +422,9 @@ print(f"Available models: {pm.get_available_models()}")
 | **Zen** | `GITHUB_TOKEN` or `COPILOT_TOKEN` | `opencode/claude-sonnet-4.5` |
 | **API** | `ANTHROPIC_API_KEY` | `anthropic/claude-sonnet-4` (configurable) |
 | **Enterprise** | `OPENCODE_PLAN=enterprise` | `opencode-go/mimo-v2.5-pro` (configurable) |
+| **OpenRouter** | `OPENROUTER_API_KEY` | `openrouter/anthropic/claude-sonnet-4.5` (configurable) |
+| **Copilot** | Active GitHub Copilot | `copilot/claude-sonnet-4` |
+| **Ollama** | `OLLAMA_HOST` or Ollama running | `ollama/llama3.3:70b` (configurable) |
 
 ---
 
@@ -186,20 +436,32 @@ oh-my-agents/
 ├── AGENTS.md                    # Detailed agent state & changelog
 ├── plan_manager.py              # Model selection logic per plan
 ├── main.py                      # CLI for the multi-agent system
+├── session_manager.py           # Session logging and continuity
+├── skill_registry.py            # Skills download and management
+├── utils.py                     # Cross-platform helpers
 ├── requirements.txt             # Python dependencies
 ├── setup.ps1                    # Windows setup script
 ├── setup.sh                     # Linux/Mac setup script
+├── install.ps1                  # Quick installer for Windows
 ├── cli/
 │   ├── wizard.py                # Interactive configuration wizard
 │   └── ui.py                    # Rich terminal UI components
+├── tests/
+│   ├── conftest.py              # Shared fixtures
+│   ├── test_plan_manager.py     # 22 tests
+│   ├── test_wizard.py           # 17 tests
+│   └── test_main.py             # 15 tests
 └── .opencode/
     ├── context.md               # Global context injected to all agents
+    ├── sessions/                # Session records (gitignored)
+    ├── skills/                  # Installed skills (gitignored)
     └── agents/
         ├── orchestrator.md      # Main coordinator
         ├── code-analyst.md      # Senior software engineer
         ├── validator.md         # QA and code validation
         ├── bulk-processor.md    # High-volume data processing (hidden)
-        └── subagent.md          # Debugger / fallback agent
+        ├── subagent.md          # Debugger / fallback agent
+        └── summarizer.md        # Session summarizer
 ```
 
 ### CLI Arguments
@@ -207,55 +469,77 @@ oh-my-agents/
 | Argument | Description |
 |----------|-------------|
 | `--setup` | Force the setup wizard to reconfigure agents |
-| `--doctor` | Diagnose environment issues (Python, deps, OpenCode CLI, agents) |
+| `--doctor` | Diagnose environment issues (Python, deps, OpenCode CLI, agents, sessions, skills) |
 | `--install-global` | Copy agent `.md` files to `~/.opencode/agents/` for global use |
 | `--dir DIR` | Override the auto-detected project root directory |
+| `--sessions` | List recorded sessions |
+| `--session <id>` | Show details of a specific session |
+| `--session-status` | Show summary of the last session |
+| `--summarize` | Scan logs and save session record |
+| `--skills` | List installed skills |
+| `--skills-search <q>` | Search skills on skills.sh |
+| `--skills-install <id>` | Install a skill (owner/repo/name) |
+| `--skills-remove <name>` | Remove an installed skill |
 
 ---
 
 ## 📝 Changelog
 
+### v1.1.1 — Session Continuity & Skills (April 2026)
+
+**New features:**
+- **Session bitacora:** `session_manager.py` scans OpenCode logs, saves session records, and injects context for continuity between sessions
+- **Skills system:** `skill_registry.py` downloads and manages skills from [skills.sh](https://skills.sh) ecosystem
+- **@summarizer agent:** New lightweight agent (`opencode-go/minimax-m2.5`) for session analysis and project continuity
+- **Global install automatic:** `setup.ps1` now installs agents globally by default — `opencode --agent orchestrator` works from any folder
+- **Quick install:** `install.ps1` for fast setup on new machines
+
+**New CLI commands:**
+| Command | Description |
+|---------|-------------|
+| `--sessions` | List recorded sessions |
+| `--session <id>` | Show details of a specific session |
+| `--session-status` | Show summary of the last session |
+| `--summarize` | Scan logs and save session record |
+| `--skills` | List installed skills |
+| `--skills-search <q>` | Search skills on skills.sh |
+| `--skills-install <id>` | Install a skill from skills.sh |
+| `--skills-remove <name>` | Remove an installed skill |
+
+**New files:**
+- `session_manager.py` — Session logging and continuity
+- `skill_registry.py` — Skills download and management
+- `utils.py` — Cross-platform helpers
+- `install.ps1` — Quick installer for Windows
+- `.opencode/agents/summarizer.md` — Summarizer agent definition
+
+### v0.9.3.3 — Interactive Main Menu (April 2026)
+
+Added interactive `questionary.select` menu that loops when configuration exists, offering: View status, Run wizard, Run diagnostics, Install globally, Exit.
+
 ### v0.9.3.1 — Path Independence & Setup Fixes (April 2026)
 
-**Critical fix:** All Python files now use `Path(__file__).parent` for path resolution instead of relative paths. The system works correctly regardless of the current working directory.
-
-- `main.py`: Added `PROJECT_ROOT` constant, `--install-global`, `--dir` flags
-- `cli/wizard.py`: Accepts `project_root` parameter, derives paths from script location
-- `plan_manager.py`: Accepts `project_root` parameter for config file detection
-- `setup.ps1`: Fixed ExecutionPolicy guidance, robust Python detection (`py -3` → `python3` → `python`), absolute paths, global install option
-- `setup.sh`: Added `cd` to script directory, absolute paths, `--install-global` flag
-- All setup messages translated to English
-- `AGENTS.md`: Updated changelog, file structure, code infrastructure docs, recent fixes table
-- `context.md`: Updated version field to 0.9.3.1
+All Python files now use `Path(__file__).parent` for path resolution. The system works correctly regardless of the current working directory.
 
 ### v0.9.2.3 — Full English Translation (April 2026)
 
-- Translated all documentation and code comments from Spanish to English
-- Agent definitions, context.md, AGENTS.md, main.py, wizard.py, ui.py, plan_manager.py
-- Goal: broader global reach for the project
+Translated all documentation and code comments from Spanish to English.
 
 ### v0.9.2.1 — Subagent Model Fix + Multi-Plan Support (April 2026)
 
-- Subagent model changed from `mimo-v2.5-pro` to `glm-5.1` (no more duplicates)
-- New plans added to PlanManager: OpenRouter, Copilot, Ollama
-- All agent permissions verified and documented correctly
-- Deprecated Qwen models removed from available models list
+Subagent model changed to `glm-5.1`. Added OpenRouter, Copilot, and Ollama plans.
 
 ### v0.9.2.0 — Rebrand to oh-my-agents (April 2026)
 
-**New identity:** Renamed from `multi-agentes-opencode` to `oh-my-agents` for better memorability and alignment with trending GitHub naming patterns.
-
-- Updated all documentation and references
-- Explicit OpenCode branding throughout
-- Banner updated with VisualIA Consulting credit and MIT license
+Renamed from `multi-agentes-opencode` to `oh-my-agents`.
 
 ### v0.9.1.0 — Base Project Sync (April 2026)
 
-Fixed critical model ID mismatch — agents were using display names instead of registry IDs (`opencode-go/*`), causing `ProviderModelNotFoundError`.
+Fixed model ID mismatch — agents now use registry IDs (`opencode-go/*`).
 
 ### v0.9.0.0 — Permission Audit (April 2026)
 
-Removed excessive write/execute permissions from agents that don't need them. Orchestrator is now strictly `read + task`. Validator is `read` only.
+Removed excessive write/execute permissions. Orchestrator is now strictly `read + task`. Validator is `read` only.
 
 ---
 
@@ -276,6 +560,7 @@ Contributions are welcome! Here's how:
 - 🎨 Improve the CLI wizard UI
 - 📖 Translate documentation
 - 🧪 Add integration tests
+- 🧩 Add skill auto-detection based on project type
 
 ---
 
@@ -284,6 +569,7 @@ Contributions are welcome! Here's how:
 - **Repository**: [visualiaconsulting/oh-my-agents](https://github.com/visualiaconsulting/oh-my-agents)
 - **Organization**: [VisualIA Consulting](https://github.com/visualiaconsulting)
 - **OpenCode**: [opencode.ai](https://opencode.ai)
+- **Skills**: [skills.sh](https://skills.sh) · [skills.sh/docs](https://skills.sh/docs)
 - **Issues**: [Report a bug](https://github.com/visualiaconsulting/oh-my-agents/issues)
 
 ---
