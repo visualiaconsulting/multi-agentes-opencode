@@ -1,6 +1,6 @@
 # 📖 Manual de Usuario — oh-my-agents v1.5.0
 
-> Guía completa para instalar, configurar y usar el sistema de agentes multi-especialista en OpenCode.
+> Guía completa para instalar, configurar y usar el sistema de agentes multi-especialista en OpenCode. Incluye MCP, skills automáticas, actualizaciones y desinstalación.
 
 ---
 
@@ -8,12 +8,16 @@
 
 1. [Instalación desde Cero](#1-instalación-desde-cero)
 2. [Los 8 Agentes](#2-los-8-agentes)
-3. [Session Management (Bitácora)](#3-session-management-bitácora)
-4. [Skills System](#4-skills-system)
-5. [Referencia CLI](#5-referencia-cli)
-6. [PlanManager](#6-planmanager)
-7. [Troubleshooting](#7-troubleshooting)
-8. [Quick Reference Card](#8-quick-reference-card)
+3. [Resolución de Rutas (SYSTEM vs WORKING)](#3-resolución-de-rutas-system-vs-working)
+4. [Session Management (Bitácora)](#4-session-management-bitácora)
+5. [Skills System](#5-skills-system)
+6. [MCP — Model Context Protocol](#6-mcp--model-context-protocol)
+7. [Sistema de Actualización Automática](#7-sistema-de-actualización-automática)
+8. [Desinstalación Global](#8-desinstalación-global)
+9. [Referencia CLI](#9-referencia-cli)
+10. [PlanManager](#10-planmanager)
+11. [Troubleshooting](#11-troubleshooting)
+12. [Quick Reference Card](#12-quick-reference-card)
 
 ---
 
@@ -122,16 +126,18 @@ validator.md
 
 ### Permisos
 
-| Agente | edit | bash | read | task |
-|--------|:----:|:----:|:----:|:----:|
-| @orchestrator | ❌ | ❌ | ✅ | ✅ |
-| @code-analyst | ✅ | ✅ | ✅ | ❌ |
-| @validator | ❌ | ❌ | ✅ | ❌ |
-| @bulk-processor | ✅ | ✅ | ✅ | ❌ |
-| @subagent | ✅ | ✅ | ✅ | ❌ |
-| @summarizer | ✅ | ✅ | ✅ | ❌ |
-| @frontend | ✅ | ✅ | ✅ | ❌ |
-| @ml-specialist | ✅ | ✅ | ✅ | ❌ |
+| Agente | edit | bash | read | task | mcp |
+|--------|:----:|:----:|:----:|:----:|:---:|
+| @orchestrator | ❌ | ❌ | ✅ | ✅ | ✅ |
+| @code-analyst | ✅ | ✅ | ✅ | ❌ | ✅ |
+| @validator | ❌ | ❌ | ✅ | ❌ | ❌ |
+| @bulk-processor | ✅ | ✅ | ✅ | ❌ | ❌ |
+| @subagent | ✅ | ✅ | ✅ | ❌ | ❌ |
+| @summarizer | ✅ | ✅ | ✅ | ❌ | ❌ |
+| @frontend | ✅ | ✅ | ✅ | ❌ | ❌ |
+| @ml-specialist | ✅ | ✅ | ✅ | ❌ | ❌ |
+
+> **v1.5.0:** Los agentes ahora tienen prompts de rol específicos y detallados en sus cuerpos `.md`. El orquestador sabe que debe descomponer y delegar, el validator sabe que es read-only, y cada especialista conoce su stack tecnológico y responsabilidades.
 
 ### Flujo Típico
 
@@ -150,7 +156,67 @@ Usuario: "Refactoriza el pipeline de datos para usar async, añade tests"
 
 ---
 
-## 3. Session Management (Bitácora)
+## 3. Resolución de Rutas (SYSTEM vs WORKING)
+
+### El Problema Original
+
+Antes de v1.3.3, cuando instalabas globalmente (`--install-global`) y ejecutabas `main.py` desde otro directorio, las sesiones, skills y logs se guardaban en la carpeta del repo (`SYSTEM_ROOT`) en vez de tu proyecto activo (`WORKING_ROOT`). Esto rompía la continuidad entre sesiones.
+
+### La Solución: Dos Raíces
+
+| Concepto | Descripción | ¿Dónde apunta? | Se usa para |
+|----------|-------------|----------------|-------------|
+| **SYSTEM_ROOT** | Carpeta donde está instalado oh-my-agents | Donde clonaste el repo | Código fuente, agentes base, instalación global |
+| **WORKING_ROOT** | Tu proyecto activo | `CWD` actual o `--dir` | Logs, sesiones, skills, `context.md` |
+
+### Ejemplo
+
+```powershell
+# Clonaste el repo en:
+C:\Users\tu\oh-my-agents          ← SYSTEM_ROOT
+
+# Estás trabajando en:
+C:\Users\tu\mi-proyecto           ← WORKING_ROOT (CWD)
+```
+
+### Detección de Agentes (3 Niveles)
+
+El sistema busca agentes `.md` en este orden (usa el primero que encuentre):
+
+1. `WORKING_ROOT/.opencode/agents/` — override local por proyecto
+2. `~/.opencode/agents/` — instalación global
+3. `SYSTEM_ROOT/.opencode/agents/` — agentes incluidos en el repo
+
+Esto significa que puedes tener agentes personalizados por proyecto sin tocar la instalación global.
+
+### Flujo de Datos
+
+```
+                        ┌──────────────────────┐
+                        │  WORKING_ROOT        │
+                        │  (tu proyecto)       │
+                        │                      │
+                        │  .opencode/          │
+                        │  ├── logs/     ← Logs de OpenCode │
+                        │  ├── sessions/ ← Bitácora         │
+                        │  ├── skills/   ← Skills instalados│
+                        │  ├── mcp.json  ← Config MCP       │
+                        │  └── context.md← Contexto activo   │
+                        └──────────────────────┘
+                        
+                        ┌──────────────────────┐
+                        │  SYSTEM_ROOT         │
+                        │  (oh-my-agents repo) │
+                        │                      │
+                        │  main.py             │
+                        │  utils.py            │
+                        │  .opencode/agents/   │ ← Agentes base
+                        └──────────────────────┘
+```
+
+---
+
+## 4. Session Management (Bitácora)
 
 ### ¿Qué es?
 
@@ -285,7 +351,7 @@ opencode --agent orchestrator
 
 ---
 
-## 4. Skills System
+## 5. Skills System
 
 ### ¿Qué son las Skills?
 
@@ -294,7 +360,58 @@ Las skills son **capacidades reutilizables** para agentes AI. Proveen conocimien
 Browse skills en: [skills.sh](https://skills.sh)
 Documentación: [skills.sh/docs](https://skills.sh/docs)
 
-### Comandos
+### Skills Predefinidas (Auto-Detección) — v1.5.0
+
+oh-my-agents incluye un catálogo de **9 skills predefinidas**. El sistema analiza tu proyecto y recomienda skills relevantes automáticamente.
+
+#### Catálogo Built-in
+
+| Skill | Se activa cuando hay... |
+|-------|------------------------|
+| **React + TypeScript** | `package.json`, `*.tsx`, `vite.config.ts` |
+| **Django REST Framework** | `manage.py`, `settings.py` |
+| **FastAPI** | `main.py` con FastAPI, `pyproject.toml` |
+| **SQL & PostgreSQL** | `docker-compose.yml`, SQL migrations |
+| **Docker & Containers** | `Dockerfile`, `docker-compose.yml` |
+| **Tailwind CSS** | `tailwind.config.js`, `*.html` |
+| **Python Testing** | `conftest.py`, `pytest.ini`, `test_*.py` |
+| **Git Workflow** | `.gitignore`, `.github/workflows/` |
+| **ML Pipeline** | `*.ipynb`, `train.py`, scikit-learn/tensorflow |
+
+#### `--skills-recommend` — Analizar proyecto y recomendar skills
+
+```powershell
+python main.py --skills-recommend
+```
+
+Output:
+```
+=== Recommended Skills ===
+
+  1. Docker & Containers — Dockerfile best practices, multi-stage builds
+     Tags: devops, docker, containers
+  2. Python Testing — pytest patterns, fixtures, mocking
+     Tags: python, testing, quality
+  3. Git Workflow — conventional commits, branching strategies
+     Tags: git, workflow, collaboration
+
+? Install recommended skills? (Y/n)
+```
+
+#### `--skills-auto` — Instalar recomendaciones sin preguntar
+
+```powershell
+python main.py --skills-auto
+```
+
+Output:
+```
+✔ Installed docker
+✔ Installed python-testing
+✔ Installed git-workflow
+```
+
+### Skills desde skills.sh
 
 #### `--skills-search <query>` — Buscar skills
 
@@ -390,16 +507,210 @@ python main.py --skills-remove vercel-react-best-practices
 
 ---
 
-## 5. Referencia CLI
+## 6. MCP — Model Context Protocol
+
+### ¿Qué es MCP?
+
+MCP (Model Context Protocol) es un protocolo abierto de Anthropic que permite a los agentes AI conectarse con **herramientas externas** y **fuentes de datos** en tiempo real. En vez de que los agentes solo lean/escriban archivos, con MCP pueden:
+
+- Consultar bases de datos SQL
+- Leer/escribir en el sistema de archivos como herramienta
+- Interactuar con APIs de GitHub
+- Conectarse a Slack, Jira, o cualquier servicio con servidor MCP
+
+### ¿Cómo Funciona?
+
+```
+Agente → MCP Client (oh-my-agents) → Servidor MCP (PostgreSQL, etc.)
+   ↑                                        ↓
+   └────────── resultado JSON-RPC ──────────┘
+```
+
+### Templates Predefinidos
+
+oh-my-agents incluye 3 templates listos para usar:
+
+| Template | Comando | Descripción |
+|----------|---------|-------------|
+| `filesystem` | `npx @modelcontextprotocol/server-filesystem` | Acceso al sistema de archivos como tool MCP |
+| `sqlite` | `uvx mcp-server-sqlite` | Consultas a bases SQLite |
+| `github` | `npx @modelcontextprotocol/server-github` | Operaciones de GitHub API |
+
+### Comandos
+
+#### `--mcp-add <template>` — Añadir servidor MCP
+
+```powershell
+python main.py --mcp-add filesystem
+```
+
+Output:
+```
+✔ Added MCP server 'filesystem'
+Run 'python main.py --mcp-status' to verify.
+```
+
+Esto guarda la configuración en `.opencode/mcp.json`.
+
+#### `--mcp-status` — Ver servidores y herramientas
+
+```powershell
+python main.py --mcp-status
+```
+
+Output:
+```
+=== MCP Servers ===
+
+  filesystem — Read and write files on the local filesystem
+    ✔ Connected (4 tool(s))
+      • read_file: Read the complete contents of a file
+      • write_file: Create a new file or overwrite an existing file
+      • list_directory: List the contents of a directory
+      • search_files: Search for files matching a pattern
+```
+
+### Agentes con MCP Habilitado
+
+Los agentes `@orchestrator` y `@code-analyst` tienen `mcp: allow` en sus permisos. Esto les permite ver y usar herramientas MCP cuando están disponibles. El catálogo de herramientas se inyecta automáticamente en `context.md`.
+
+### Seguridad
+
+- **NUNCA** comitees `.opencode/mcp.json` (está en `.gitignore`)
+- El template `github` requiere un token personal — configúralo como variable de entorno, no en el archivo
+- Los comandos MCP se ejecutan como subprocesos locales (no hay `shell=True`)
+
+---
+
+## 7. Sistema de Actualización Automática
+
+### ¿Qué es?
+
+oh-my-agents puede **actualizarse a sí mismo** desde GitHub releases con un solo comando. Descarga la última versión, reemplaza los archivos del sistema, y **preserva** tus datos (sesiones, skills, logs, agentes personalizados).
+
+### Comandos
+
+#### `--version` — Ver versión actual
+
+```powershell
+python main.py --version
+```
+
+Output:
+```
+oh-my-agents v1.5.0
+```
+
+#### `--check-updates` — Buscar actualizaciones
+
+```powershell
+python main.py --check-updates
+```
+
+Output (sin updates):
+```
+✔ oh-my-agents is up to date (v1.5.0).
+```
+
+Output (con update disponible):
+```
+=== Update Available ===
+
+  Current:  v1.5.0
+  Latest:   v1.6.0
+
+  Run python main.py --update to install.
+```
+
+#### `--update` — Instalar actualización
+
+```powershell
+python main.py --update
+```
+
+**¿Qué hace?**
+1. Consulta la API de GitHub para la última versión
+2. Descarga el ZIP del release
+3. Crea backup de los archivos actuales
+4. Sobrescribe archivos del framework (`.py`, `cli/`, `tests/`)
+5. **Preserva** tus sesiones, skills, logs y `.git`
+6. Actualiza el archivo `VERSION`
+
+**Qué NUNCA se toca durante un update:**
+- `.opencode/sessions/` — tu historial de bitácora
+- `.opencode/skills/` — tus skills instalados
+- `.opencode/logs/` — logs de OpenCode
+- `~/.opencode/agents/` — tus agentes personalizados
+- `.git/` — historial de git
+
+También puedes actualizar vía scripts:
+```bash
+./setup.sh --update
+powershell -File setup.ps1 --update
+```
+
+---
+
+## 8. Desinstalación Global
+
+### `--uninstall` — Remover instalación global
+
+Si necesitas limpiar la instalación o tienes conflictos de versión:
+
+```powershell
+python main.py --uninstall
+```
+
+**¿Qué hace?**
+1. Detecta `~/.opencode/agents/`, `sessions/`, `skills/`, `config.json`
+2. Te pregunta interactivamente qué quieres eliminar
+3. Elimina los directorios/archivos seleccionados
+4. En Linux/Mac, también borra el wrapper `oh-my-agents` de `/usr/local/bin/` o `~/.local/bin/`
+
+Ejemplo de sesión:
+```
+=== Uninstall oh-my-agents ===
+
+The following will be removed:
+  ✖ Global agents: C:\Users\tu\.opencode\agents
+  ✖ Global sessions: C:\Users\tu\.opencode\sessions
+  ✖ Global skills: C:\Users\tu\.opencode\skills
+  ✖ Global config: C:\Users\tu\.opencode\config.json
+
+? Remove ALL of the above (agents, sessions, skills, config)? (Y/n) Y
+? This action cannot be undone. Continue? (y/N) Y
+
+  ✔ Removed Global agents
+  ✔ Removed Global sessions
+  ✔ Removed Global skills
+  ✔ Removed Global config
+✔ Uninstall complete. 4 item(s) removed.
+```
+
+**IMPORTANTE:** La desinstalación **NO** borra el repositorio clonado de oh-my-agents. Para eliminarlo completamente, borra la carpeta del repo manualmente.
+
+También disponible vía scripts:
+```bash
+./setup.sh --uninstall
+powershell -File setup.ps1 --uninstall
+```
+
+---
+
+## 9. Referencia CLI
 
 ### Todos los Argumentos
 
 | Argumento | Descripción | Ejemplo |
 |-----------|-------------|---------|
 | `--setup` | Fuerza el wizard de configuración | `python main.py --setup` |
-| `--doctor` | Diagnóstico del entorno | `python main.py --doctor` |
+| `--doctor` | Diagnóstico completo del entorno | `python main.py --doctor` |
+| `--version` | Muestra la versión actual | `python main.py --version` |
+| `--check-updates` | Busca nuevas versiones en GitHub | `python main.py --check-updates` |
+| `--update` | Actualiza oh-my-agents a la última versión | `python main.py --update` |
 | `--install-global` | Copia agentes a `~/.opencode/agents/` | `python main.py --install-global` |
-| `--dir DIR` | Override del directorio raíz | `python main.py --dir C:\proyecto` |
+| `--uninstall` | Elimina instalación global interactivamente | `python main.py --uninstall` |
+| `--dir DIR` | Define explícitamente el WORKING_ROOT | `python main.py --dir C:\proyecto` |
 | `--sessions` | Lista sesiones grabadas | `python main.py --sessions` |
 | `--session <id>` | Detalle de sesión específica | `python main.py --session a3f8b2c1` |
 | `--session-status` | Resumen de la última sesión | `python main.py --session-status` |
@@ -408,6 +719,10 @@ python main.py --skills-remove vercel-react-best-practices
 | `--skills-search <q>` | Busca skills en skills.sh | `python main.py --skills-search database` |
 | `--skills-install <id>` | Instala skill desde skills.sh | `python main.py --skills-install owner/repo/name` |
 | `--skills-remove <name>` | Remueve skill instalada | `python main.py --skills-remove neon-postgres` |
+| `--skills-recommend` | Analiza proyecto y recomienda skills | `python main.py --skills-recommend` |
+| `--skills-auto` | Instala skills recomendadas sin preguntar | `python main.py --skills-auto` |
+| `--mcp-add <template>` | Añade servidor MCP (filesystem, sqlite, github) | `python main.py --mcp-add sqlite` |
+| `--mcp-status` | Muestra servidores MCP y herramientas disponibles | `python main.py --mcp-status` |
 
 ### Menú Interactivo
 
@@ -418,7 +733,11 @@ Si ejecutas `python main.py` sin argumentos (con agentes ya configurados):
   ❯ View agent status
     Run setup wizard
     Run diagnostics
+    Check for updates
+    MCP status
+    Recommend skills
     Install globally
+    Uninstall globally
     View sessions
     View skills
     Exit
@@ -426,7 +745,7 @@ Si ejecutas `python main.py` sin argumentos (con agentes ya configurados):
 
 ---
 
-## 6. PlanManager
+## 10. PlanManager
 
 ### ¿Qué es?
 
@@ -458,7 +777,7 @@ python main.py --doctor
 
 ---
 
-## 7. Troubleshooting
+## 11. Troubleshooting
 
 ### "OpenCode CLI not found"
 
@@ -522,6 +841,46 @@ opencode --agent orchestrator
 python main.py --summarize
 ```
 
+### "Update failed" o "Failed to download release archive"
+
+```
+✖ Update failed: Failed to download release archive (HTTP 404).
+```
+
+**Solución:**
+1. Verifica tu conexión a internet
+2. Verifica que el tag/versión existe en GitHub: https://github.com/visualiaconsulting/oh-my-agents/releases
+3. Si estás en modo git, asegúrate de que el remote `origin` apunta al repo correcto
+
+### "Command not found: npx" (al usar MCP)
+
+```
+✖ Command not found: npx (FileNotFoundError)
+```
+
+**Solución:** Los templates MCP `filesystem` y `github` requieren Node.js y npx:
+```powershell
+# Windows
+winget install OpenJS.NodeJS
+
+# Verificar
+node --version
+npx --version
+```
+
+### "No MCP servers configured"
+
+```
+No MCP servers configured.
+Add one with: python main.py --mcp-add <template_name>
+```
+
+**Solución:** Añade un servidor MCP:
+```powershell
+python main.py --mcp-add filesystem
+python main.py --mcp-add sqlite
+```
+
 ### "requests library not installed"
 
 ```
@@ -535,22 +894,27 @@ pip install requests
 
 ---
 
-## 8. Quick Reference Card
+## 12. Quick Reference Card
 
-### Los 10 Comandos Más Usados
+### Los 15 Comandos Más Usados
 
 | # | Comando | Qué hace |
 |---|---------|----------|
 | 1 | `opencode --agent orchestrator` | Inicia el orquestador |
 | 2 | `python main.py --doctor` | Diagnóstico completo |
-| 3 | `python main.py --summarize` | Guarda bitácora de sesión |
-| 4 | `python main.py --sessions` | Ver historial de sesiones |
-| 5 | `python main.py --session-status` | Última sesión |
-| 6 | `python main.py --skills-search <q>` | Buscar skills |
-| 7 | `python main.py --skills-install <id>` | Instalar skill |
-| 8 | `python main.py --skills` | Ver skills instaladas |
-| 9 | `python main.py --install-global` | Instalar agentes globalmente |
-| 10 | `python main.py --setup` | Reconfigurar agentes |
+| 3 | `python main.py --check-updates` | Buscar actualizaciones |
+| 4 | `python main.py --update` | Actualizar a la última versión |
+| 5 | `python main.py --summarize` | Guarda bitácora de sesión |
+| 6 | `python main.py --sessions` | Ver historial de sesiones |
+| 7 | `python main.py --session-status` | Última sesión |
+| 8 | `python main.py --skills-recommend` | Recomendar skills para el proyecto |
+| 9 | `python main.py --skills-auto` | Instalar skills recomendadas |
+| 10 | `python main.py --skills-search <q>` | Buscar skills |
+| 11 | `python main.py --skills-install <id>` | Instalar skill |
+| 12 | `python main.py --mcp-add <template>` | Añadir servidor MCP |
+| 13 | `python main.py --mcp-status` | Estado de servidores MCP |
+| 14 | `python main.py --install-global` | Instalar agentes globalmente |
+| 15 | `python main.py --setup` | Reconfigurar agentes |
 
 ### Flujo de Trabajo Diario
 
