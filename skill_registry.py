@@ -89,6 +89,18 @@ class SkillRegistry:
         except OSError:
             return None
 
+    def install_from_catalog(self, skill_id: str) -> bool:
+        """Install a skill from the built-in catalog by ID."""
+        from skill_recommender import SkillRecommender
+        recommender = SkillRecommender(project_root=self.project_root)
+        for skill in recommender.catalog:
+            if skill.get("id") == skill_id:
+                source = skill.get("source", "")
+                if source:
+                    return self.install_skill(source)
+                return False
+        return False
+
     def inject_skills_context(self, skill_names: Optional[list] = None) -> str:
         """Generate a context string with active skills.
 

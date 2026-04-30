@@ -129,6 +129,23 @@ The **Qwen3.6 Plus** and **Qwen3.5 Plus** models were previously removed from th
 
 ## 📝 Changelog
 
+### v1.5.0 — MCP Integration & Auto-Skills (Feature Branch)
+
+**New features:**
+- **MCP Client:** `mcp_client.py` implements Model Context Protocol (JSON-RPC 2.0 over stdio)
+- **MCP Config:** `mcp_config.py` manages `.opencode/mcp.json` with server templates
+- **Auto-Skills:** `skill_recommender.py` analyzes your project and recommends relevant skills
+- **Skills Catalog:** `skills_catalog.json` with 9 built-in skills (React, Django, FastAPI, Docker, etc.)
+- **New CLI flags:** `--mcp-status`, `--mcp-add`, `--skills-recommend`, `--skills-auto`
+- **Agent permissions:** `mcp: allow` for orchestrator and code-analyst
+
+**New files:**
+- `mcp_client.py`, `mcp_config.py` — MCP protocol implementation
+- `skill_recommender.py`, `skills_catalog.json` — Auto-skill recommendation
+- `tests/test_mcp.py` — MCP and recommender tests
+
+**Note:** This is a feature branch (`feature/mcp-skills`). Test thoroughly before merging to main.
+
 ### v1.3.3 — Automatic Update System (April 2026)
 
 **New features:**

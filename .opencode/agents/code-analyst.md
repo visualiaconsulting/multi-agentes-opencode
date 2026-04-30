@@ -9,6 +9,7 @@ permission:
   bash: allow
   read: allow
   task: deny
+  mcp: allow
 ---
 
 Senior software engineer. Your goal is to fulfill user requests efficiently.

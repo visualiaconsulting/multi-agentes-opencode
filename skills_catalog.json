@@ -1,0 +1,90 @@
+{
+  "skills": [
+    {
+      "id": "react-typescript",
+      "name": "React + TypeScript",
+      "description": "Best practices for React with TypeScript: hooks, patterns, performance",
+      "tags": ["frontend", "react", "typescript"],
+      "triggers": ["package.json", "vite.config.ts", "tsconfig.json", "*.tsx", "*.jsx"],
+      "source": "https://raw.githubusercontent.com/visualiaconsulting/oh-my-agents/main/skills/react-typescript.md",
+      "priority": 1
+    },
+    {
+      "id": "django-rest",
+      "name": "Django REST Framework",
+      "description": "Patterns for building REST APIs with Django: serializers, views, permissions",
+      "tags": ["backend", "python", "django", "api"],
+      "triggers": ["manage.py", "settings.py", "requirements.txt"],
+      "trigger_content": ["django", "djangorestframework"],
+      "source": "https://raw.githubusercontent.com/visualiaconsulting/oh-my-agents/main/skills/django-rest.md",
+      "priority": 1
+    },
+    {
+      "id": "fastapi",
+      "name": "FastAPI",
+      "description": "Modern Python API development with FastAPI: dependencies, async, OpenAPI",
+      "tags": ["backend", "python", "api"],
+      "triggers": ["main.py", "requirements.txt", "pyproject.toml"],
+      "trigger_content": ["fastapi", "uvicorn"],
+      "source": "https://raw.githubusercontent.com/visualiaconsulting/oh-my-agents/main/skills/fastapi.md",
+      "priority": 1
+    },
+    {
+      "id": "sql-postgresql",
+      "name": "SQL & PostgreSQL",
+      "description": "SQL best practices, query optimization, and PostgreSQL-specific features",
+      "tags": ["database", "sql", "postgresql"],
+      "triggers": ["*.sql", "docker-compose.yml", "migrations"],
+      "trigger_content": ["postgres", "postgresql", "psycopg"],
+      "source": "https://raw.githubusercontent.com/visualiaconsulting/oh-my-agents/main/skills/sql-postgresql.md",
+      "priority": 2
+    },
+    {
+      "id": "docker",
+      "name": "Docker & Containers",
+      "description": "Dockerfile best practices, multi-stage builds, docker-compose patterns",
+      "tags": ["devops", "docker", "containers"],
+      "triggers": ["Dockerfile", "docker-compose.yml", "docker-compose.yaml", ".dockerignore"],
+      "source": "https://raw.githubusercontent.com/visualiaconsulting/oh-my-agents/main/skills/docker.md",
+      "priority": 2
+    },
+    {
+      "id": "tailwind-css",
+      "name": "Tailwind CSS",
+      "description": "Utility-first CSS with Tailwind: configuration, components, dark mode",
+      "tags": ["frontend", "css", "tailwind"],
+      "triggers": ["tailwind.config.js", "tailwind.config.ts", "*.html"],
+      "trigger_content": ["tailwindcss"],
+      "source": "https://raw.githubusercontent.com/visualiaconsulting/oh-my-agents/main/skills/tailwind-css.md",
+      "priority": 2
+    },
+    {
+      "id": "python-testing",
+      "name": "Python Testing",
+      "description": "pytest patterns, fixtures, mocking, and test organization",
+      "tags": ["python", "testing", "quality"],
+      "triggers": ["test_*.py", "*_test.py", "conftest.py", "pytest.ini"],
+      "source": "https://raw.githubusercontent.com/visualiaconsulting/oh-my-agents/main/skills/python-testing.md",
+      "priority": 2
+    },
+    {
+      "id": "git-workflow",
+      "name": "Git Workflow",
+      "description": "Conventional commits, branching strategies, and PR best practices",
+      "tags": ["git", "workflow", "collaboration"],
+      "triggers": [".gitignore", ".github/workflows/*.yml"],
+      "source": "https://raw.githubusercontent.com/visualiaconsulting/oh-my-agents/main/skills/git-workflow.md",
+      "priority": 3
+    },
+    {
+      "id": "ml-pipeline",
+      "name": "ML Pipeline",
+      "description": "Machine learning pipelines: data preprocessing, model training, evaluation",
+      "tags": ["ml", "data", "python"],
+      "triggers": ["*.ipynb", "train.py", "requirements.txt"],
+      "trigger_content": ["scikit-learn", "tensorflow", "pytorch", "pandas", "numpy"],
+      "source": "https://raw.githubusercontent.com/visualiaconsulting/oh-my-agents/main/skills/ml-pipeline.md",
+      "priority": 2
+    }
+  ]
+}

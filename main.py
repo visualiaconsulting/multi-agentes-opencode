@@ -4,6 +4,9 @@ import shutil
 from pathlib import Path
 
 from update_manager import check_for_updates, run_update
+from mcp_client import MCPClient
+from mcp_config import MCPConfig, MCP_SERVER_TEMPLATES
+from skill_recommender import SkillRecommender
 
 SYSTEM_ROOT = Path(__file__).parent.resolve()
 
@@ -329,6 +332,107 @@ def run_skills_remove(name: str, working_root=None):
         print_error(f"Skill '{name}' not found.")
 
 
+def run_mcp_status(working_root=None):
+    """Show MCP server status and available tools."""
+    from cli.ui import console, print_success, print_error
+    from utils import resolve_working_root
+
+    if working_root is None:
+        working_root = resolve_working_root()
+
+    config = MCPConfig(project_root=working_root)
+    servers = config.get_servers()
+
+    if not servers:
+        console.print("[yellow]No MCP servers configured.[/yellow]")
+        console.print("[dim]Add one with: python main.py --mcp-add <template_name>[/dim]")
+        console.print(f"[dim]Available templates: {', '.join(MCP_SERVER_TEMPLATES.keys())}[/dim]")
+        return
+
+    console.print("\n[bold cyan]=== MCP Servers ===[/bold cyan]\n")
+    client = MCPClient(project_root=working_root)
+    for server_config in servers:
+        name = server_config.get("name", "unknown")
+        desc = server_config.get("description", "")
+        console.print(f"  [bold]{name}[/bold] — {desc}")
+        # Try to connect and list tools
+        ok, msg = client.connect_server(server_config)
+        if ok:
+            tools = client.connections[name].tools
+            console.print(f"    [green]✔ Connected[/green] ({len(tools)} tool(s))")
+            for tool in tools:
+                console.print(f"      • {tool.get('name', '?')}: {tool.get('description', '')[:60]}")
+            client.disconnect_server(name)
+        else:
+            console.print(f"    [red]✖ {msg}[/red]")
+    console.print("")
+
+
+def run_mcp_add(template_name: str, working_root=None):
+    """Add an MCP server from a template."""
+    from cli.ui import console, print_success, print_error
+    from utils import resolve_working_root
+
+    if working_root is None:
+        working_root = resolve_working_root()
+
+    config = MCPConfig(project_root=working_root)
+    template = config.get_template(template_name)
+    if not template:
+        print_error(f"Unknown template: '{template_name}'")
+        console.print(f"[dim]Available: {', '.join(MCP_SERVER_TEMPLATES.keys())}[/dim]")
+        return
+
+    # Substitute {{project_root}} if present
+    server_config = dict(template)
+    cmd = server_config.get("command", [])
+    server_config["command"] = [
+        c.replace("{{project_root}}", str(working_root)) for c in cmd
+    ]
+
+    config.add_server(server_config)
+    print_success(f"Added MCP server '{template_name}'")
+    console.print(f"[dim]Run 'python main.py --mcp-status' to verify.[/dim]")
+
+
+def run_skills_recommend(working_root=None, auto_install=False):
+    """Analyze project and recommend skills."""
+    from cli.ui import console, print_success, print_error
+    from utils import resolve_working_root
+    import questionary
+
+    if working_root is None:
+        working_root = resolve_working_root()
+
+    recommender = SkillRecommender(project_root=working_root)
+    recommendations = recommender.get_installable_recommendations()
+
+    if not recommendations:
+        console.print("[yellow]No new skill recommendations for this project.[/yellow]")
+        return
+
+    console.print("\n[bold cyan]=== Recommended Skills ===[/bold cyan]\n")
+    for i, skill in enumerate(recommendations, 1):
+        console.print(f"  {i}. [bold]{skill['name']}[/bold] — {skill['description']}")
+        console.print(f"     Tags: {', '.join(skill.get('tags', []))}")
+
+    if auto_install:
+        results = recommender.install_recommendations(recommendations)
+        for skill_id, success in results:
+            if success:
+                console.print(f"  [green]✔ Installed {skill_id}[/green]")
+            else:
+                console.print(f"  [red]✖ Failed {skill_id}[/red]")
+        return
+
+    console.print("")
+    install = questionary.confirm("Install recommended skills?", default=True).ask()
+    if install:
+        results = recommender.install_recommendations(recommendations)
+        installed = sum(1 for _, s in results if s)
+        print_success(f"Installed {installed}/{len(results)} skill(s).")
+
+
 def run_uninstall():
     """Remove global installation and optionally clean up data."""
     from cli.ui import console, print_success, print_error
@@ -461,6 +565,11 @@ def main():
     parser.add_argument("--skills-install", type=str, default=None, help="Install a skill (owner/repo/name)")
     parser.add_argument("--skills-remove", type=str, default=None, help="Remove an installed skill")
 
+    parser.add_argument("--mcp-status", action="store_true", help="Show MCP servers and tools")
+    parser.add_argument("--mcp-add", type=str, default=None, help="Add MCP server from template (filesystem, sqlite, github)")
+    parser.add_argument("--skills-recommend", action="store_true", help="Analyze project and recommend skills")
+    parser.add_argument("--skills-auto", action="store_true", help="Auto-install recommended skills without prompting")
+
     args = parser.parse_args()
 
     from utils import resolve_working_root
@@ -481,6 +590,22 @@ def main():
 
     if args.update:
         run_update_command()
+        return
+
+    if args.mcp_status:
+        run_mcp_status(working_root=working_root)
+        return
+
+    if args.mcp_add:
+        run_mcp_add(args.mcp_add, working_root=working_root)
+        return
+
+    if args.skills_recommend:
+        run_skills_recommend(working_root=working_root)
+        return
+
+    if args.skills_auto:
+        run_skills_recommend(working_root=working_root, auto_install=True)
         return
 
     missing = check_dependencies()
@@ -575,6 +700,8 @@ def main():
                 "Run setup wizard",
                 "Run diagnostics",
                 "Check for updates",
+                "MCP status",
+                "Recommend skills",
                 "Install globally",
                 "Uninstall globally",
                 "View sessions",
@@ -612,6 +739,10 @@ def main():
             install_global()
         elif choice == "Uninstall globally":
             run_uninstall()
+        elif choice == "MCP status":
+            run_mcp_status(working_root=working_root)
+        elif choice == "Recommend skills":
+            run_skills_recommend(working_root=working_root)
         elif choice == "View sessions":
             run_sessions_list(working_root=working_root)
         elif choice == "View skills":

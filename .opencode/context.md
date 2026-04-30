@@ -39,3 +39,8 @@ Skills from skills.sh can be installed to extend agent capabilities:
 - `python main.py --skills` to list installed skills
 
 Installed skills are stored in `.opencode/skills/` and injected into context.
+
+## MCP Support
+
+This project supports MCP (Model Context Protocol) servers.
+Configure servers in `.opencode/mcp.json`.

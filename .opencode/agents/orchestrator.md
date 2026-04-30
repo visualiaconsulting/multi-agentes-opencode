@@ -9,6 +9,7 @@ permission:
   bash: deny
   read: allow
   task: allow
+  mcp: allow
 ---
 
 Central system orchestrator. Your goal is to fulfill user requests efficiently.
