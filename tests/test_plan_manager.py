@@ -56,7 +56,7 @@ class TestGetModel:
 
     def test_orchestrator_model(self, clean_env):
         pm = PlanManager()
-        assert pm.get_model("orchestrator") == "opencode-go/mimo-v2.5-pro"
+        assert pm.get_model("orchestrator") == "opencode-go/kimi-k2.6"
 
     def test_code_analyst_model(self, clean_env):
         pm = PlanManager()
@@ -64,7 +64,7 @@ class TestGetModel:
 
     def test_validator_model(self, clean_env):
         pm = PlanManager()
-        assert pm.get_model("validator") == "opencode-go/kimi-k2.6"
+        assert pm.get_model("validator") == "opencode-go/mimo-v2.5-pro"
 
     def test_bulk_processor_model(self, clean_env):
         pm = PlanManager()
@@ -77,6 +77,14 @@ class TestGetModel:
     def test_fallback_model(self, clean_env):
         pm = PlanManager()
         assert pm.get_model("fallback") == "opencode-go/minimax-m2.5"
+
+    def test_frontend_model(self, clean_env):
+        pm = PlanManager()
+        assert pm.get_model("frontend") == "opencode-go/qwen3.6-plus"
+
+    def test_ml_specialist_model(self, clean_env):
+        pm = PlanManager()
+        assert pm.get_model("ml-specialist") == "opencode-go/minimax-m2.7"
 
     def test_unknown_role_returns_fallback(self, clean_env):
         pm = PlanManager()

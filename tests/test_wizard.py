@@ -37,16 +37,28 @@ class TestCheckExistingConfig:
 class TestSetupDefaults:
     """Tests for setup_defaults()."""
 
-    def test_creates_six_agents(self, temp_empty_project):
+    def test_creates_eight_agents(self, temp_empty_project):
         wizard = SetupWizard(project_root=temp_empty_project)
         wizard.setup_defaults()
-        assert len(wizard.agents) == 6
+        assert len(wizard.agents) == 8
 
     def test_summarizer_is_included(self, temp_empty_project):
         wizard = SetupWizard(project_root=temp_empty_project)
         wizard.setup_defaults()
         names = [a["name"] for a in wizard.agents]
         assert "summarizer" in names
+
+    def test_frontend_is_included(self, temp_empty_project):
+        wizard = SetupWizard(project_root=temp_empty_project)
+        wizard.setup_defaults()
+        names = [a["name"] for a in wizard.agents]
+        assert "frontend" in names
+
+    def test_ml_specialist_is_included(self, temp_empty_project):
+        wizard = SetupWizard(project_root=temp_empty_project)
+        wizard.setup_defaults()
+        names = [a["name"] for a in wizard.agents]
+        assert "ml-specialist" in names
 
     def test_agents_have_required_fields(self, temp_empty_project):
         wizard = SetupWizard(project_root=temp_empty_project)
@@ -86,6 +98,18 @@ class TestSetupDefaults:
         assert ca["permissions"]["edit"] == "allow"
         assert ca["permissions"]["bash"] == "allow"
 
+    def test_orchestrator_model_is_kimi(self, temp_empty_project):
+        wizard = SetupWizard(project_root=temp_empty_project)
+        wizard.setup_defaults()
+        orch = next(a for a in wizard.agents if a["name"] == "orchestrator")
+        assert orch["model"] == "opencode-go/kimi-k2.6"
+
+    def test_validator_model_is_mimo(self, temp_empty_project):
+        wizard = SetupWizard(project_root=temp_empty_project)
+        wizard.setup_defaults()
+        val = next(a for a in wizard.agents if a["name"] == "validator")
+        assert val["model"] == "opencode-go/mimo-v2.5-pro"
+
 
 class TestSaveAll:
     """Tests for save_all()."""
@@ -98,7 +122,7 @@ class TestSaveAll:
         agent_dir = temp_empty_project / ".opencode" / "agents"
         assert agent_dir.exists()
         md_files = list(agent_dir.glob("*.md"))
-        assert len(md_files) == 6
+        assert len(md_files) == 8
 
     def test_summarizer_saved(self, temp_empty_project):
         wizard = SetupWizard(project_root=temp_empty_project)
@@ -107,6 +131,22 @@ class TestSaveAll:
 
         agent_dir = temp_empty_project / ".opencode" / "agents"
         assert (agent_dir / "summarizer.md").exists()
+
+    def test_frontend_saved(self, temp_empty_project):
+        wizard = SetupWizard(project_root=temp_empty_project)
+        wizard.setup_defaults()
+        wizard.save_all()
+
+        agent_dir = temp_empty_project / ".opencode" / "agents"
+        assert (agent_dir / "frontend.md").exists()
+
+    def test_ml_specialist_saved(self, temp_empty_project):
+        wizard = SetupWizard(project_root=temp_empty_project)
+        wizard.setup_defaults()
+        wizard.save_all()
+
+        agent_dir = temp_empty_project / ".opencode" / "agents"
+        assert (agent_dir / "ml-specialist.md").exists()
 
     def test_saved_files_are_valid_yaml_frontmatter(self, temp_empty_project):
         import yaml

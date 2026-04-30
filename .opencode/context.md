@@ -1,7 +1,7 @@
 ---
 project: oh-my-agents
 plan: go
-version: 1.1.1
+version: 1.2.0
 ---
 
 # Project Context
@@ -9,12 +9,14 @@ version: 1.1.1
 This is a multi-agent system configured for the OpenCode Go plan.
 The available agents are:
 
-- **@orchestrator** — Coordinator. Delegates complex tasks to sub-agents. Model: opencode-go/mimo-v2.5-pro
-- **@code-analyst** — Senior engineer. Implements clean and efficient code. Model: opencode-go/deepseek-v4-pro
-- **@validator** — QA. Validates code and runs tests (read-only). Model: opencode-go/kimi-k2.6
-- **@bulk-processor** — Mass data processing (hidden). Model: opencode-go/deepseek-v4-flash
+- **@orchestrator** — Coordinator. Delegates complex tasks to sub-agents. Model: opencode-go/kimi-k2.6 (SWE-Bench Pro 58.6%)
+- **@code-analyst** — Senior engineer. Implements clean and efficient code. Model: opencode-go/deepseek-v4-pro (GPQA Diamond 90.1%)
+- **@validator** — QA. Validates code and runs tests (read-only). Model: opencode-go/mimo-v2.5-pro (94% math precision)
+- **@bulk-processor** — Mass data processing (hidden). Model: opencode-go/deepseek-v4-flash (MMLU-Pro 87.5%)
 - **@subagent** — Debugger and backup agent for auxiliary tasks. Model: opencode-go/glm-5.1
 - **@summarizer** — Session summarizer and project analyst (lightweight). Model: opencode-go/minimax-m2.5
+- **@frontend** — UI specialist — React, TypeScript, Tailwind. Model: opencode-go/qwen3.6-plus (SWE-Bench Verified 78.8%)
+- **@ml-specialist** — ML and data pipeline specialist. Model: opencode-go/minimax-m2.7 (MLE-Bench Lite 66.6%)
 
 To use in another project, copy `.opencode/agents/` to the target project
 and modify this `CONTEXT.md` with the description of the actual project.

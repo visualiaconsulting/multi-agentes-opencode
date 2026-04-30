@@ -12,12 +12,14 @@ class PlanManager:
     # Using registry IDs (provider/model-id) that OpenCode recognizes
     PLAN_MODELS = {
         "go": {
-            "orchestrator": "opencode-go/mimo-v2.5-pro",
+            "orchestrator": "opencode-go/kimi-k2.6",
             "code-analyst": "opencode-go/deepseek-v4-pro",
-            "validator": "opencode-go/kimi-k2.6",
+            "validator": "opencode-go/mimo-v2.5-pro",
             "bulk-processor": "opencode-go/deepseek-v4-flash",
             "subagent": "opencode-go/glm-5.1",
             "summarizer": "opencode-go/minimax-m2.5",
+            "frontend": "opencode-go/qwen3.6-plus",
+            "ml-specialist": "opencode-go/minimax-m2.7",
             "fallback": "opencode-go/minimax-m2.5",
             "all_available": [
                 "opencode-go/glm-5", "opencode-go/glm-5.1",
@@ -25,7 +27,8 @@ class PlanManager:
                 "opencode-go/mimo-v2-pro", "opencode-go/mimo-v2-omni",
                 "opencode-go/mimo-v2.5-pro", "opencode-go/mimo-v2.5",
                 "opencode-go/minimax-m2.5", "opencode-go/minimax-m2.7",
-                "opencode-go/deepseek-v4-pro", "opencode-go/deepseek-v4-flash"
+                "opencode-go/deepseek-v4-pro", "opencode-go/deepseek-v4-flash",
+                "opencode-go/qwen3.5-plus", "opencode-go/qwen3.6-plus"
             ]
         },
         "zen": {
@@ -35,6 +38,8 @@ class PlanManager:
             "bulk-processor": "opencode/gemini-3-flash",
             "subagent": "opencode/gpt-5.4-mini",
             "summarizer": "opencode/minimax-m2.5-free",
+            "frontend": "opencode/minimax-m2.5-free",
+            "ml-specialist": "opencode/minimax-m2.5",
             "fallback": "opencode/gpt-5.4-mini",
             "all_available": [
                 "opencode/big-pickle",
@@ -57,15 +62,19 @@ class PlanManager:
             "bulk-processor": os.getenv("BULK_MODEL", "deepseek/DeepSeek-V4-Flash"),
             "subagent": os.getenv("SUBAGENT_MODEL", "openai/gpt-4o-mini"),
             "summarizer": os.getenv("SUMMARIZER_MODEL", "openai/gpt-4o-mini"),
+            "frontend": os.getenv("FRONTEND_MODEL", "openai/gpt-4o-mini"),
+            "ml-specialist": os.getenv("ML_MODEL", "openai/gpt-4o-mini"),
             "fallback": os.getenv("FALLBACK_MODEL", "openai/gpt-4o-mini")
         },
         "enterprise": {
-            "orchestrator": os.getenv("ENT_ORCHESTRATOR", "opencode-go/mimo-v2.5-pro"),
+            "orchestrator": os.getenv("ENT_ORCHESTRATOR", "opencode-go/kimi-k2.6"),
             "code-analyst": os.getenv("ENT_ANALYST", "opencode-go/deepseek-v4-pro"),
-            "validator": os.getenv("ENT_VALIDATOR", "opencode-go/kimi-k2.6"),
+            "validator": os.getenv("ENT_VALIDATOR", "opencode-go/mimo-v2.5-pro"),
             "bulk-processor": os.getenv("ENT_BULK", "opencode-go/deepseek-v4-flash"),
             "subagent": os.getenv("ENT_SUBAGENT", "opencode-go/glm-5.1"),
             "summarizer": os.getenv("ENT_SUMMARIZER", "opencode-go/minimax-m2.5"),
+            "frontend": os.getenv("ENT_FRONTEND", "opencode-go/qwen3.6-plus"),
+            "ml-specialist": os.getenv("ENT_ML", "opencode-go/minimax-m2.7"),
             "fallback": os.getenv("ENT_FALLBACK", "opencode-go/minimax-m2.5")
         },
         "openrouter": {
@@ -75,6 +84,8 @@ class PlanManager:
             "bulk-processor": os.getenv("OR_BULK", "openrouter/deepseek/deepseek-v3"),
             "subagent": os.getenv("OR_SUBAGENT", "openrouter/meta-llama/llama-3.3-70b"),
             "summarizer": os.getenv("OR_SUMMARIZER", "openrouter/openai/gpt-4o-mini"),
+            "frontend": os.getenv("OR_FRONTEND", "openrouter/qwen/qwen-2.5-32b"),
+            "ml-specialist": os.getenv("OR_ML", "openrouter/openai/gpt-4o-mini"),
             "fallback": os.getenv("OR_FALLBACK", "openrouter/openai/gpt-4o-mini")
         },
         "copilot": {
@@ -84,6 +95,8 @@ class PlanManager:
             "bulk-processor": "copilot/gpt-4.1-mini",
             "subagent": "copilot/claude-haiku-4",
             "summarizer": "copilot/gpt-4.1-nano",
+            "frontend": "copilot/gpt-4.1-nano",
+            "ml-specialist": "copilot/gpt-4.1-nano",
             "fallback": "copilot/gpt-4.1-nano"
         },
         "ollama": {
@@ -93,6 +106,8 @@ class PlanManager:
             "bulk-processor": os.getenv("OLLAMA_BULK", "ollama/qwen2.5-coder:7b"),
             "subagent": os.getenv("OLLAMA_SUB", "ollama/llama3.1:8b"),
             "summarizer": os.getenv("OLLAMA_SUMMARIZER", "ollama/phi3:3.8b"),
+            "frontend": os.getenv("OLLAMA_FRONTEND", "ollama/qwen2.5-coder:7b"),
+            "ml-specialist": os.getenv("OLLAMA_ML", "ollama/qwen2.5-coder:7b"),
             "fallback": os.getenv("OLLAMA_FALLBACK", "ollama/phi3:3.8b")
         }
     }
