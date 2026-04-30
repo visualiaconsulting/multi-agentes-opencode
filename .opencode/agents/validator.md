@@ -2,7 +2,7 @@
 name: validator
 description: QA and code validator
 mode: subagent
-model: opencode-go/kimi-k2.6
+model: opencode-go/mimo-v2.5-pro
 temperature: 0.2
 permission:
   edit: deny

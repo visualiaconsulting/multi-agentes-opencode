@@ -20,7 +20,7 @@ def temp_project():
 name: orchestrator
 description: Central system orchestrator
 mode: primary
-model: opencode-go/mimo-v2.5-pro
+model: opencode-go/kimi-k2.6
 temperature: 0.2
 permission:
   edit: deny

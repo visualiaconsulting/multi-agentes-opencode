@@ -422,7 +422,7 @@ print(f"Available models: {pm.get_available_models()}")
 
 | Plan | Detection Method | Orchestrator Model |
 |------|------------------|-------------------|
-| **Go** (default) | Default or `OPENCODE_PLAN=go` | `opencode-go/mimo-v2.5-pro` |
+| **Go** (default) | Default or `OPENCODE_PLAN=go` | `opencode-go/kimi-k2.6` |
 | **Zen** | `GITHUB_TOKEN` or `COPILOT_TOKEN` | `opencode/claude-sonnet-4.5` |
 | **API** | `ANTHROPIC_API_KEY` | `anthropic/claude-sonnet-4` (configurable) |
 | **Enterprise** | `OPENCODE_PLAN=enterprise` | `opencode-go/mimo-v2.5-pro` (configurable) |
@@ -465,7 +465,9 @@ oh-my-agents/
         ├── validator.md         # QA and code validation
         ├── bulk-processor.md    # High-volume data processing (hidden)
         ├── subagent.md          # Debugger / fallback agent
-        └── summarizer.md        # Session summarizer
+        ├── summarizer.md        # Session summarizer
+        ├── frontend.md          # Frontend specialist
+        └── ml-specialist.md     # ML and data pipeline specialist
 ```
 
 ### CLI Arguments

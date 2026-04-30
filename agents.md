@@ -22,12 +22,14 @@ The project implements an **Orchestrator and Specialists** architecture on the d
 
 | Agent | Role | Model (Go Plan) | Permissions | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| **@orchestrator** | Main Coordinator | `opencode-go/mimo-v2.5-pro` | `Read, Task` | Breaks down complex tasks and delegates to sub-agents. Does NOT write code or execute commands. |
-| **@code-analyst** | Senior Engineer | `opencode-go/deepseek-v4-pro` | `Edit, Bash, Read` | Clean code and architecture implementation. |
-| **@validator** | QA Specialist | `opencode-go/kimi-k2.6` | `Read Only` | Validation, linting, and quality review. No editing or bash. |
-| **@bulk-processor** | Data Processor | `opencode-go/deepseek-v4-flash` | `Edit, Bash, Read` | Repetitive, high-volume tasks (hidden). |
+| **@orchestrator** | Main Coordinator | `opencode-go/kimi-k2.6` | `Read, Task` | Breaks down complex tasks and delegates to sub-agents. Does NOT write code or execute commands. (SWE-Bench Pro 58.6%) |
+| **@code-analyst** | Senior Engineer | `opencode-go/deepseek-v4-pro` | `Edit, Bash, Read` | Clean code and architecture implementation. (GPQA Diamond 90.1%) |
+| **@validator** | QA Specialist | `opencode-go/mimo-v2.5-pro` | `Read Only` | Validation, linting, and quality review. No editing or bash. (94% math precision) |
+| **@bulk-processor** | Data Processor | `opencode-go/deepseek-v4-flash` | `Edit, Bash, Read` | Repetitive, high-volume tasks (hidden). (MMLU-Pro 87.5%) |
 | **@subagent** | Debugger/Fallback | `opencode-go/glm-5.1` | `Edit, Bash, Read` | Generic agent for debugging and auxiliary tasks. |
 | **@summarizer** | Session Analyst | `opencode-go/minimax-m2.5` | `Edit, Bash, Read` | Lightweight session summarizer, log analysis, and project continuity. |
+| **@frontend** | UI Specialist | `opencode-go/qwen3.6-plus` | `Edit, Bash, Read` | Frontend — React, TypeScript, Tailwind, UI iteration. (SWE-Bench Verified 78.8%, 1M context) |
+| **@ml-specialist** | ML Engineer | `opencode-go/minimax-m2.7` | `Edit, Bash, Read` | ML and data pipelines — training, inference, MLOps. (MLE-Bench Lite 66.6%) |
 
 ### 🔍 Permission Details by Agent
 
@@ -39,6 +41,8 @@ The project implements an **Orchestrator and Specialists** architecture on the d
 | **@bulk-processor** | ✅ allow | ✅ allow | ✅ allow | ❌ deny |
 | **@subagent** | ✅ allow | ✅ allow | ✅ allow | ❌ deny |
 | **@summarizer** | ✅ allow | ✅ allow | ✅ allow | ❌ deny |
+| **@frontend** | ✅ allow | ✅ allow | ✅ allow | ❌ deny |
+| **@ml-specialist** | ✅ allow | ✅ allow | ✅ allow | ❌ deny |
 
 ---
 
@@ -57,12 +61,14 @@ The `PlanManager` is the logical brain that manages agent configuration based on
 
 | Role | Model |
 |:---|:---|
-| Orchestrator | `opencode-go/mimo-v2.5-pro` |
+| Orchestrator | `opencode-go/kimi-k2.6` |
 | Code Analyst | `opencode-go/deepseek-v4-pro` |
-| Validator | `opencode-go/kimi-k2.6` |
+| Validator | `opencode-go/mimo-v2.5-pro` |
 | Bulk Processor | `opencode-go/deepseek-v4-flash` |
 | Subagent | `opencode-go/glm-5.1` |
 | Summarizer | `opencode-go/minimax-m2.5` |
+| Frontend | `opencode-go/qwen3.6-plus` |
+| ML Specialist | `opencode-go/minimax-m2.7` |
 | Fallback | `opencode-go/minimax-m2.5` |
 
 ### ~~`opencode.jsonc`~~ — Removed
@@ -109,18 +115,39 @@ Visual components with `rich` for terminal: banners, agent tables, panels, and s
 
 ---
 
-## ⚠️ Known Issue: Qwen Models Disabled (Resolved)
+## ⚠️ Known Issue: Qwen Models (Reincorporated — v1.2.0)
 
-The **Qwen3.6 Plus** and **Qwen3.5 Plus** models are marked as `deprecated` in the OpenCode registry.
+The **Qwen3.6 Plus** and **Qwen3.5 Plus** models were previously removed from the available models list due to a false positive in the OpenCode registry.
 
-> **Applied solution:** They were removed from the available models list in `plan_manager.py`. The orchestrator model was changed to `opencode-go/mimo-v2.5-pro`. `opencode.jsonc` which caused conflicts was removed.
-
-### Reference
-- Issue: [#22644](https://github.com/anomalyco/opencode/issues/22644)
+> **Applied solution:** Reincorporated in v1.2.0. Verified available on [opencode.ai/es/go](https://opencode.ai/es/go) with credits: Qwen 3.6 Plus (3,300/5h), Qwen 3.5 Plus (10,200/5h). The original issue was a model ID format mismatch, not actual deprecation. Registry IDs: `opencode-go/qwen3.6-plus` and `opencode-go/qwen3.5-plus`.
 
 ---
 
 ## 📝 Changelog
+
+### v1.2.0 — 8 Agents with Benchmark-Optimized Models (April 2026)
+
+**Model swaps based on verified benchmarks:**
+- Orchestrator: `MiMo V2.5 Pro` → **Kimi K2.6** (SWE-Bench Pro 58.6%, 3x usage credits on Go plan)
+- Validator: `Kimi K2.6` → **MiMo V2.5 Pro** (94% math precision for rigorous verification)
+
+**New agents:**
+- **@frontend:** Qwen 3.6 Plus (SWE-Bench Verified 78.8%, 1M context, $0.325/M tokens). Added to all 7 plans.
+- **@ml-specialist:** MiniMax M2.7 (MLE-Bench Lite 66.6%, 10B active parameters). Added to all 7 plans.
+
+**Registry fix:**
+- Reincorporated `opencode-go/qwen3.5-plus` and `opencode-go/qwen3.6-plus` to Go plan `all_available`
+- Confirmed not deprecated — original issue #22644 was model ID format mismatch
+- Verified available on [opencode.ai/es/go](https://opencode.ai/es/go)
+
+**Files modified:**
+- `plan_manager.py` — +2 models to registry, swap orch/val, +2 roles in all 7 plans
+- `.opencode/agents/frontend.md` — New agent definition
+- `.opencode/agents/ml-specialist.md` — New agent definition
+- `cli/wizard.py` — 8 defaults with updated models
+- `tests/test_wizard.py` — +4 tests (8 agents, frontend, ml-specialist, model swaps)
+- `tests/test_plan_manager.py` — +2 model tests, swap asserts
+- `.opencode/context.md` — Version 1.2.0, 8 agents with benchmarks
 
 ### v1.1.1 — Session Continuity & Skills (April 2026)
 
@@ -398,7 +425,9 @@ Translated all documentation, comments, and user-facing strings from Spanish to 
         ├── validator.md         # QA and code validation
         ├── bulk-processor.md    # Bulk processing (hidden)
         ├── subagent.md          # Debugger / fallback agent
-        └── summarizer.md        # Session summarizer
+        ├── summarizer.md        # Session summarizer
+        ├── frontend.md          # Frontend specialist
+        └── ml-specialist.md     # ML and data pipeline specialist
 ```
 
 ---
@@ -418,7 +447,7 @@ print(f"Available models: {pm.get_available_models()}")
 
 | Plan | Detection Method | Orchestrator Model |
 |------|---------------------|--------------------|
-| **Go** (default) | Default or `OPENCODE_PLAN=go` | `opencode-go/mimo-v2.5-pro` |
+| **Go** (default) | Default or `OPENCODE_PLAN=go` | `opencode-go/kimi-k2.6` |
 | **Zen** | `GITHUB_TOKEN` or `COPILOT_TOKEN` | `opencode/claude-sonnet-4.5` |
 | **API** | `ANTHROPIC_API_KEY` | `anthropic/claude-sonnet-4` (configurable) |
 | **Enterprise** | `OPENCODE_PLAN=enterprise` | `opencode-go/mimo-v2.5-pro` (configurable) |

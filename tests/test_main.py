@@ -19,7 +19,7 @@ class TestLoadAgents:
         from main import load_agents
         agents = load_agents(project_root=temp_project)
         orch = next(a for a in agents if a["name"] == "@orchestrator")
-        assert orch["model"] == "opencode-go/mimo-v2.5-pro"
+        assert orch["model"] == "opencode-go/kimi-k2.6"
         assert orch["role"] == "Primary"
 
     def test_no_agents_dir_returns_empty(self, temp_empty_project):
