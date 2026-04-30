@@ -157,6 +157,49 @@ class PlanManager:
         """Gets the model for a role, with fallback if not available"""
         return self.models.get(role, self.models.get("fallback"))
     
+    def validate_models(self):
+        """Validate that agent models in .opencode/agents/*.md exist in the registry.
+
+        Returns:
+            (valid, invalid): tuple of (list of valid agent names,
+                              list of (name, model) tuples for invalid agents)
+        """
+        import yaml
+
+        agent_dir = self.project_root / ".opencode" / "agents"
+        if not agent_dir.exists():
+            return [], []
+
+        known_models = set()
+        for plan_data in self.PLAN_MODELS.values():
+            if "all_available" in plan_data:
+                known_models.update(plan_data["all_available"])
+            for key, val in plan_data.items():
+                if key != "all_available" and isinstance(val, str):
+                    known_models.add(val)
+
+        valid = []
+        invalid = []
+
+        for md_file in agent_dir.glob("*.md"):
+            try:
+                with open(md_file, "r", encoding="utf-8") as f:
+                    content = f.read()
+                if content.startswith("---"):
+                    parts = content.split("---")
+                    if len(parts) >= 3:
+                        metadata = yaml.safe_load(parts[1])
+                        name = metadata.get("name", md_file.stem)
+                        model = metadata.get("model", "")
+                        if model and model in known_models:
+                            valid.append(name)
+                        else:
+                            invalid.append((name, model))
+            except (yaml.YAMLError, OSError):
+                invalid.append((md_file.stem, "parse error"))
+
+        return valid, invalid
+
     def generate_config_snippet(self) -> Dict:
         """Generates a configuration snippet for opencode.json"""
         return {
