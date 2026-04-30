@@ -6,7 +6,7 @@
 
 [![OpenCode](https://img.shields.io/badge/Built_for-OpenCode_Go-00D4AA?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTVNMiAxN2wxMCA1IDEwLTVNMiAxMmwxMCA1IDEwLTUiLz48L3N2Zz4=)](https://opencode.ai)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-1.1.1-blue?style=for-the-badge)](https://github.com/visualiaconsulting/oh-my-agents/releases/tag/v1.1.1)
+[![Version](https://img.shields.io/badge/version-1.2.0-blue?style=for-the-badge)](https://github.com/visualiaconsulting/oh-my-agents/releases/tag/v1.2.0)
 [![GitHub Stars](https://img.shields.io/github/stars/visualiaconsulting/oh-my-agents?style=for-the-badge&logo=github)](https://github.com/visualiaconsulting/oh-my-agents/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/visualiaconsulting/oh-my-agents?style=for-the-badge&logo=github)](https://github.com/visualiaconsulting/oh-my-agents/issues)
 
@@ -39,12 +39,16 @@
 
 | Agent | Model (Go Plan) | Role | Permissions |
 |-------|:----------------:|------|:-----------:|
-| **@orchestrator** | `mimo-v2.5-pro` | 🎼 Coordinator — decomposes tasks, delegates to specialists | `read` `task` |
+| **@orchestrator** | `kimi-k2.6` | 🎼 Coordinator — decomposes tasks, delegates to specialists | `read` `task` |
 | **@code-analyst** | `deepseek-v4-pro` | 💻 Senior Engineer — writes clean code, implements features | `edit` `bash` `read` |
-| **@validator** | `kimi-k2.6` | 🔍 QA Specialist — validates quality, reviews code | `read` only |
+| **@validator** | `mimo-v2.5-pro` | 🔍 QA Specialist — validates quality, edge cases, precision | `read` only |
 | **@bulk-processor** | `deepseek-v4-flash` | ⚡ Data Processor — handles repetitive, high-volume tasks (hidden) | `edit` `bash` `read` |
 | **@subagent** | `glm-5.1` | 🛠️ Debugger — auxiliary tasks and fallback agent | `edit` `bash` `read` |
 | **@summarizer** | `minimax-m2.5` | 📊 Session Analyst — summarizes sessions, analyzes project state | `edit` `bash` `read` |
+| **@frontend** | `qwen3.6-plus` | 🎨 UI Specialist — React, TypeScript, Tailwind, rapid iteration | `edit` `bash` `read` |
+| **@ml-specialist** | `minimax-m2.7` | 🧪 ML Engineer — training, inference, data pipelines, MLOps | `edit` `bash` `read` |
+
+> **Model selection:** Each model is chosen by benchmark performance — Kimi K2.6 leads SWE-Bench Pro (58.6%), DeepSeek V4 Pro leads GPQA Diamond (90.1%), MiMo V2.5 Pro has 94% math precision, Qwen 3.6 Plus ($0.325/M tokens) is optimal for iterative UI work, MiniMax M2.7 leads MLE-Bench Lite (66.6%).
 
 > **How it works:** You give a task to `@orchestrator`. It analyzes, plans, and delegates to the right specialist(s). The validator checks quality before returning results. After the session, `@summarizer` can analyze logs and save a continuity record.
 
@@ -484,6 +488,21 @@ oh-my-agents/
 ---
 
 ## 📝 Changelog
+
+### v1.2.0 — 8 Agents with Benchmark-Optimized Models (April 2026)
+
+**Model swaps based on verified benchmarks:**
+- Orchestrator: `MiMo V2.5 Pro` → **Kimi K2.6** (SWE-Bench Pro 58.6%, 3x usage credits on Go plan)
+- Validator: `Kimi K2.6` → **MiMo V2.5 Pro** (94% math precision for rigorous verification)
+
+**New agents:**
+- **@frontend** — UI specialist with `Qwen 3.6 Plus` (SWE-Bench Verified 78.8%, 1M context, $0.325/M tokens)
+- **@ml-specialist** — ML pipelines with `MiniMax M2.7` (MLE-Bench Lite 66.6%, 10B active parameters)
+
+**Registry fix:**
+- Reincorporated `opencode-go/qwen3.5-plus` and `opencode-go/qwen3.6-plus` to available models
+- Confirmed not deprecated — original issue was model ID format mismatch
+- Verified available on [opencode.ai/es/go](https://opencode.ai/es/go)
 
 ### v1.1.1 — Session Continuity & Skills (April 2026)
 
