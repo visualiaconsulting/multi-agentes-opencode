@@ -148,22 +148,19 @@ try {
 }
 
 # ---------------------------------------------------------------------------
-# 5. Offer global install (makes agents available from any directory)
+# 5. Global install (automatic — agents available from any directory)
 # ---------------------------------------------------------------------------
 Write-Host ""
-Write-Host "[5/5] Global install (optional)..." -ForegroundColor Yellow
-Write-Host "  Copy agent definitions to ~/.opencode/agents/ so they are available"
-Write-Host "  from any project directory via OpenCode."
+Write-Host "[5/5] Installing agents globally..." -ForegroundColor Yellow
+Write-Host ""
+Write-Host "  OpenCode looks for .opencode/ in the current directory by default."
+Write-Host "  Installing agents to ~/.opencode/agents/ so"
+Write-Host "  'opencode --agent orchestrator' works from ANY folder on your system."
+Write-Host ""
 
-$installGlobal = Read-Host "  Run global install? [y/N]"
-if ($installGlobal -match '^[yY]') {
-    Write-Host ""
-    & $PythonCmd main.py --install-global
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "  WARNING: Global install reported an error. Check the output above." -ForegroundColor Yellow
-    }
-} else {
-    Write-Host "  Skipped. You can run it later with: python main.py --install-global"
+& $PythonCmd main.py --install-global
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "  WARNING: Global install reported an error. Check the output above." -ForegroundColor Yellow
 }
 
 Write-Host ""
@@ -171,5 +168,15 @@ Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "  Setup complete!" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  Next step: opencode --agent orchestrator" -ForegroundColor White
+Write-Host "  Run: opencode --agent orchestrator" -ForegroundColor White
+Write-Host ""
+Write-Host "  Session management:" -ForegroundColor Cyan
+Write-Host "    python main.py --summarize      Save session after OpenCode run" -ForegroundColor White
+Write-Host "    python main.py --sessions         View session history" -ForegroundColor White
+Write-Host "    python main.py --session-status   Last session summary" -ForegroundColor White
+Write-Host ""
+Write-Host "  Skills (from skills.sh):" -ForegroundColor Cyan
+Write-Host "    python main.py --skills-search <q>  Search skills" -ForegroundColor White
+Write-Host "    python main.py --skills-install <id> Install a skill" -ForegroundColor White
+Write-Host "    python main.py --skills               List installed skills" -ForegroundColor White
 Write-Host ""

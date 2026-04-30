@@ -17,6 +17,7 @@ class PlanManager:
             "validator": "opencode-go/kimi-k2.6",
             "bulk-processor": "opencode-go/deepseek-v4-flash",
             "subagent": "opencode-go/glm-5.1",
+            "summarizer": "opencode-go/minimax-m2.5",
             "fallback": "opencode-go/minimax-m2.5",
             "all_available": [
                 "opencode-go/glm-5", "opencode-go/glm-5.1",
@@ -33,6 +34,7 @@ class PlanManager:
             "validator": "opencode/claude-haiku-4.5",
             "bulk-processor": "opencode/gemini-3-flash",
             "subagent": "opencode/gpt-5.4-mini",
+            "summarizer": "opencode/minimax-m2.5-free",
             "fallback": "opencode/gpt-5.4-mini",
             "all_available": [
                 "opencode/big-pickle",
@@ -54,6 +56,7 @@ class PlanManager:
             "validator": os.getenv("VALIDATOR_MODEL", "anthropic/claude-haiku-3"),
             "bulk-processor": os.getenv("BULK_MODEL", "deepseek/DeepSeek-V4-Flash"),
             "subagent": os.getenv("SUBAGENT_MODEL", "openai/gpt-4o-mini"),
+            "summarizer": os.getenv("SUMMARIZER_MODEL", "openai/gpt-4o-mini"),
             "fallback": os.getenv("FALLBACK_MODEL", "openai/gpt-4o-mini")
         },
         "enterprise": {
@@ -62,6 +65,7 @@ class PlanManager:
             "validator": os.getenv("ENT_VALIDATOR", "opencode-go/kimi-k2.6"),
             "bulk-processor": os.getenv("ENT_BULK", "opencode-go/deepseek-v4-flash"),
             "subagent": os.getenv("ENT_SUBAGENT", "opencode-go/glm-5.1"),
+            "summarizer": os.getenv("ENT_SUMMARIZER", "opencode-go/minimax-m2.5"),
             "fallback": os.getenv("ENT_FALLBACK", "opencode-go/minimax-m2.5")
         },
         "openrouter": {
@@ -70,6 +74,7 @@ class PlanManager:
             "validator": os.getenv("OR_VALIDATOR", "openrouter/anthropic/claude-haiku-4.5"),
             "bulk-processor": os.getenv("OR_BULK", "openrouter/deepseek/deepseek-v3"),
             "subagent": os.getenv("OR_SUBAGENT", "openrouter/meta-llama/llama-3.3-70b"),
+            "summarizer": os.getenv("OR_SUMMARIZER", "openrouter/openai/gpt-4o-mini"),
             "fallback": os.getenv("OR_FALLBACK", "openrouter/openai/gpt-4o-mini")
         },
         "copilot": {
@@ -78,6 +83,7 @@ class PlanManager:
             "validator": "copilot/claude-haiku-4",
             "bulk-processor": "copilot/gpt-4.1-mini",
             "subagent": "copilot/claude-haiku-4",
+            "summarizer": "copilot/gpt-4.1-nano",
             "fallback": "copilot/gpt-4.1-nano"
         },
         "ollama": {
@@ -86,6 +92,7 @@ class PlanManager:
             "validator": os.getenv("OLLAMA_VALIDATOR", "ollama/llama3.2:3b"),
             "bulk-processor": os.getenv("OLLAMA_BULK", "ollama/qwen2.5-coder:7b"),
             "subagent": os.getenv("OLLAMA_SUB", "ollama/llama3.1:8b"),
+            "summarizer": os.getenv("OLLAMA_SUMMARIZER", "ollama/phi3:3.8b"),
             "fallback": os.getenv("OLLAMA_FALLBACK", "ollama/phi3:3.8b")
         }
     }

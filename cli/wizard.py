@@ -63,8 +63,9 @@ class SetupWizard:
         table.add_row("validator", "opencode-go/kimi-k2.6", "Subagent")
         table.add_row("bulk-processor", "opencode-go/deepseek-v4-flash", "Subagent")
         table.add_row("subagent", "opencode-go/glm-5.1", "Fallback")
+        table.add_row("summarizer", "opencode-go/minimax-m2.5", "Session Summary")
         table.add_row("fallback", "opencode-go/minimax-m2.5", "Speed/Recovery")
-        
+
         console.print(table)
 
     def setup_defaults(self):
@@ -75,7 +76,8 @@ class SetupWizard:
             {"name": "code-analyst", "role": "subagent", "model": "opencode-go/deepseek-v4-pro", "desc": "Senior software engineer"},
             {"name": "validator", "role": "subagent", "model": "opencode-go/kimi-k2.6", "desc": "QA and code validator"},
             {"name": "bulk-processor", "role": "subagent", "model": "opencode-go/deepseek-v4-flash", "desc": "Bulk data processing"},
-            {"name": "subagent", "role": "subagent", "model": "opencode-go/glm-5.1", "desc": "Fallback agent and generic tasks"}
+            {"name": "subagent", "role": "subagent", "model": "opencode-go/glm-5.1", "desc": "Fallback agent and generic tasks"},
+            {"name": "summarizer", "role": "subagent", "model": "opencode-go/minimax-m2.5", "desc": "Session summarizer and project analyst"}
         ]
 
         permissions_map = {
@@ -84,6 +86,7 @@ class SetupWizard:
             "validator":        {"edit": "deny",  "bash": "deny",  "read": "allow", "task": "deny"},
             "bulk-processor":   {"edit": "allow", "bash": "allow", "read": "allow", "task": "deny"},
             "subagent":         {"edit": "allow", "bash": "allow", "read": "allow", "task": "deny"},
+            "summarizer":       {"edit": "allow", "bash": "allow", "read": "allow", "task": "deny"},
         }
 
         for d in defaults:

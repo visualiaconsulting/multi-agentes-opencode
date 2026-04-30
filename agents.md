@@ -13,6 +13,8 @@ The project implements an **Orchestrator and Specialists** architecture on the d
 | **Orchestrator** | Main agent that breaks down complex tasks and delegates to sub-agents |
 | **Specialists** | Secondary agents with specific roles (code, QA, data) |
 | **PlanManager** | Python module that detects the active plan and assigns models |
+| **SessionManager** | Manages session logs, bitacora, and continuity between sessions |
+| **SkillRegistry** | Downloads and manages skills from skills.sh ecosystem |
 
 ---
 
@@ -25,6 +27,7 @@ The project implements an **Orchestrator and Specialists** architecture on the d
 | **@validator** | QA Specialist | `opencode-go/kimi-k2.6` | `Read Only` | Validation, linting, and quality review. No editing or bash. |
 | **@bulk-processor** | Data Processor | `opencode-go/deepseek-v4-flash` | `Edit, Bash, Read` | Repetitive, high-volume tasks (hidden). |
 | **@subagent** | Debugger/Fallback | `opencode-go/glm-5.1` | `Edit, Bash, Read` | Generic agent for debugging and auxiliary tasks. |
+| **@summarizer** | Session Analyst | `opencode-go/minimax-m2.5` | `Edit, Bash, Read` | Lightweight session summarizer, log analysis, and project continuity. |
 
 ### 🔍 Permission Details by Agent
 
@@ -35,6 +38,7 @@ The project implements an **Orchestrator and Specialists** architecture on the d
 | **@validator** | ❌ deny | ❌ deny | ✅ allow | ❌ deny |
 | **@bulk-processor** | ✅ allow | ✅ allow | ✅ allow | ❌ deny |
 | **@subagent** | ✅ allow | ✅ allow | ✅ allow | ❌ deny |
+| **@summarizer** | ✅ allow | ✅ allow | ✅ allow | ❌ deny |
 
 ---
 
@@ -45,7 +49,7 @@ The project implements an **Orchestrator and Specialists** architecture on the d
 The `PlanManager` is the logical brain that manages agent configuration based on the detected plan:
 
 - **Plan Detection:** Automatically identifies whether you are in `go`, `zen`, `api`, `enterprise`, `openrouter`, `copilot`, or `ollama` using environment variables and configuration files.
-- **Model Mapping:** Maps each role (`orchestrator`, `code-analyst`, `validator`, `bulk-processor`, `subagent`) to the optimal model for the active plan.
+- **Model Mapping:** Maps each role (`orchestrator`, `code-analyst`, `validator`, `bulk-processor`, `subagent`, `summarizer`) to the optimal model for the active plan.
 - **Fallbacks:** Provides backup models if the primary one is not available.
 - **API Key Validation:** Verifies that external providers have the necessary credentials (only for `api` and `openrouter` plans).
 
@@ -58,6 +62,7 @@ The `PlanManager` is the logical brain that manages agent configuration based on
 | Validator | `opencode-go/kimi-k2.6` |
 | Bulk Processor | `opencode-go/deepseek-v4-flash` |
 | Subagent | `opencode-go/glm-5.1` |
+| Summarizer | `opencode-go/minimax-m2.5` |
 | Fallback | `opencode-go/minimax-m2.5` |
 
 ### ~~`opencode.jsonc`~~ — Removed
@@ -70,10 +75,29 @@ Command-line interface that:
 - Displays the multi-agent system banner
 - Runs the setup wizard (`--setup`) if no agents are defined
 - Loads and displays agent status from `.opencode/agents/*.md`
-- Diagnoses environment issues (`--doctor`)
+- Diagnoses environment issues (`--doctor`) — now includes model ID validation, session history, and skills status
 - Installs agents globally to `~/.opencode/agents/` (`--install-global`)
 - Supports explicit project root override (`--dir DIR`)
 - Uses `PROJECT_ROOT = Path(__file__).parent.resolve()` for path-independent operation
+- **Session management:** `--sessions`, `--session <id>`, `--session-status`, `--summarize`
+- **Skills management:** `--skills`, `--skills-search <query>`, `--skills-install <id>`, `--skills-remove <name>`
+
+### `session_manager.py` — Session Bitacora
+
+Manages session continuity:
+- **`scan_logs()`** — Reads `.opencode/logs/` to extract errors, files changed, commands run
+- **`save_session()`** — Saves session record as JSON in `.opencode/sessions/`
+- **`inject_context()`** — Generates markdown context from recent sessions for `context.md`
+- **`update_context_md()`** — Automatically updates `context.md` with session history
+- Sessions are stored with: ID, timestamp, agent, summary, errors, pending tasks, files changed
+
+### `skill_registry.py` — Skills Manager
+
+Manages skills from the skills.sh ecosystem:
+- **`search_skills(query)`** — Searches skills.sh for available skills
+- **`install_skill(identifier)`** — Downloads skill from GitHub to `.opencode/skills/`
+- **`inject_skills_context()`** — Generates markdown context from installed skills
+- **`update_context_md()`** — Updates `context.md` with active skills
 
 ### `cli/wizard.py` — Setup Wizard
 
@@ -97,6 +121,82 @@ The **Qwen3.6 Plus** and **Qwen3.5 Plus** models are marked as `deprecated` in t
 ---
 
 ## 📝 Changelog
+
+### v1.1.1 — Session Continuity & Skills (April 2026)
+
+**New features:**
+- **Session bitacora:** `session_manager.py` scans OpenCode logs, saves session records, and injects context for continuity between sessions
+- **Skills system:** `skill_registry.py` downloads and manages skills from skills.sh ecosystem
+- **@summarizer agent:** New lightweight agent (`opencode-go/minimax-m2.5`) for session analysis and project continuity
+- **Global install automatic:** `setup.ps1` now installs agents globally by default — `opencode --agent orchestrator` works from any folder
+- **Quick install:** `install.ps1` for fast setup on new machines
+
+**New CLI commands:**
+| Command | Description |
+|---------|-------------|
+| `--sessions` | List recorded sessions |
+| `--session <id>` | Show details of a specific session |
+| `--session-status` | Show summary of the last session |
+| `--summarize` | Scan logs and save session record |
+| `--skills` | List installed skills |
+| `--skills-search <q>` | Search skills on skills.sh |
+| `--skills-install <id>` | Install a skill from skills.sh |
+| `--skills-remove <name>` | Remove an installed skill |
+
+**New files:**
+- `session_manager.py` — Session logging and continuity
+- `skill_registry.py` — Skills download and management
+- `utils.py` — Cross-platform helpers
+- `install.ps1` — Quick installer for Windows
+- `.opencode/agents/summarizer.md` — Summarizer agent definition
+
+**Files modified:**
+- `main.py` — 8 new CLI arguments, interactive menu updated
+- `plan_manager.py` — Added `summarizer` role to all plans
+- `cli/ui.py` — Session and skills UI components
+- `cli/wizard.py` — Summarizer added to defaults
+- `setup.ps1` — Global install now automatic
+- `.opencode/context.md` — Session and skills documentation
+- `requirements.txt` — Added `requests`
+- `.gitignore` — Added `.opencode/sessions/`, `.opencode/skills/`
+
+### v0.9.3.3 — Interactive Main Menu (April 2026)
+
+**Problem:** Running `python main.py` without flags when agents were already configured would print the status table and exit immediately — no way to interact.
+
+**Solution:** Added an interactive `questionary.select` menu that loops when configuration exists, offering:
+- View agent status
+- Run setup wizard (reconfigure)
+- Run diagnostics (`--doctor`)
+- Install globally (`--install-global`)
+- Exit
+
+CLI flags (`--setup`, `--doctor`, `--install-global`) still bypass the menu and work as direct commands. First-time (no config) still prompts to run the wizard.
+
+**File modified:**
+- `main.py` — Replaced linear flow with interactive menu loop in `main()`
+
+### v0.9.3.2 — Global Install, Tests, Model Validation & CI (April 2026)
+
+**Setup experience overhaul:** Global install is now the default. Agents work from ANY directory after setup — not just inside the project folder.
+
+**Files modified:**
+- `setup.ps1` — Global install prompts `[Yn]` (default yes) with clear explanation of why it matters
+- `setup.sh` — Same improvement for Linux/Mac, renumbered steps to `[5/5]`
+- `main.py` — Improved `install_global()` success message; `--doctor` now validates model IDs
+- `plan_manager.py` — Added `validate_models()` method that checks agent models against the registry
+- `README.md` — Updated Quick Start and global install docs with explanation of agent scope
+
+**New files:**
+- `tests/conftest.py` — Shared fixtures (temp_project, clean_env, mock_questionary)
+- `tests/test_plan_manager.py` — 22 tests: plan detection, model mapping, validate_models()
+- `tests/test_wizard.py` — 15 tests: init, defaults, permissions, save, format_md
+- `tests/test_main.py` — 15 tests: load_agents, dependencies, install_global, doctor
+- `.github/workflows/ci.yml` — CI pipeline: test matrix (Python 3.8–3.12) + ruff lint
+
+**What `--doctor` now detects:**
+- Invalid model IDs in agent `.md` files that don't match any known registry model
+- Reports each mismatched agent and suggests re-running `--setup`
 
 ### v0.9.3.1 — Path Independence & Setup Fixes (April 2026)
 
@@ -268,14 +368,28 @@ Translated all documentation, comments, and user-facing strings from Spanish to 
 ./
 ├── AGENTS.md                    # This document (agent status)
 ├── README.md                    # Main project documentation
-├── plan_manager.py              # Model selection logic
+├── plan_manager.py              # Model selection logic + model validation
 ├── main.py                      # Multi-agent system CLI
-├── requirements.txt             # Python dependencies
-├── setup.ps1                    # Windows setup script
-├── setup.sh                     # Linux/Mac setup script
+├── session_manager.py           # Session logging and continuity
+├── skill_registry.py            # Skills download and management
+├── utils.py                     # Cross-platform helpers
+├── requirements.txt             # Python dependencies (now includes requests)
+├── setup.ps1                    # Windows setup script (global install by default)
+├── setup.sh                     # Linux/Mac setup script (global install by default)
+├── install.ps1                  # Quick installer for Windows
 ├── cli/
+│   ├── __init__.py
 │   ├── wizard.py                # Interactive setup wizard
 │   └── ui.py                    # Visual components (rich)
+├── tests/
+│   ├── __init__.py
+│   ├── conftest.py              # Shared fixtures
+│   ├── test_plan_manager.py     # 22 tests: plans, models, validation
+│   ├── test_wizard.py           # 15 tests: defaults, permissions, save
+│   └── test_main.py             # 15 tests: agents, deps, global install
+├── .github/
+│   └── workflows/
+│       └── ci.yml               # CI pipeline (test matrix + lint)
 └── .opencode/
     ├── context.md               # Global context injected to all agents
     └── agents/
@@ -283,7 +397,8 @@ Translated all documentation, comments, and user-facing strings from Spanish to 
         ├── code-analyst.md      # Senior software engineer
         ├── validator.md         # QA and code validation
         ├── bulk-processor.md    # Bulk processing (hidden)
-        └── subagent.md          # Debugger / fallback agent
+        ├── subagent.md          # Debugger / fallback agent
+        └── summarizer.md        # Session summarizer
 ```
 
 ---
@@ -315,10 +430,12 @@ print(f"Available models: {pm.get_available_models()}")
 
 ## 🚀 Suggested Next Steps
 
-1. **Connectivity Validation:** Run `python main.py` to verify that the PlanManager correctly detects the environment.
-2. **Delegation Tests:** Use `opencode --agent orchestrator` with a complex task to validate interaction between agents.
-3. **Context Customization:** Update `.opencode/CONTEXT.md` if the project scales to a specific domain.
-4. **Continuous Integration:** Add automatic linters and validators to maintain configuration consistency.
+1. **Run tests locally:** `pytest tests/ -v` (58 tests, all current features covered)
+2. **Connectivity Validation:** Run `python main.py` to verify that the PlanManager correctly detects the environment
+3. **Delegation Tests:** Use `opencode --agent orchestrator` with a complex task to validate interaction between agents (works from any folder after global install)
+4. **Model Health Check:** Run `python main.py --doctor` to verify all agent model IDs are valid
+5. **Session Continuity:** Run `python main.py --summarize` after an OpenCode session to save the session record
+6. **Skills Exploration:** Run `python main.py --skills-search database` to find relevant skills for your project
 
 ---
 

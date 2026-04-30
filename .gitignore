@@ -4,6 +4,8 @@ __pycache__/
 .env
 .opencode/logs/
 .opencode/cache/
+.opencode/sessions/
+.opencode/skills/
 .DS_Store
 dist/
 build/
