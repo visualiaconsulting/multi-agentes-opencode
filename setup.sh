@@ -46,7 +46,27 @@ else
     echo ""
 fi
 
-# 4. Handle --install-global flag (checked BEFORE running main.py)
+# 4. Handle --uninstall flag (checked BEFORE running main.py)
+if [ "$1" = "--uninstall" ]; then
+    echo "========================================"
+    echo "  oh-my-agents — Uninstall"
+    echo "========================================"
+    echo ""
+    $PYTHON_CMD main.py --uninstall
+    exit $?
+fi
+
+# 5. Handle --update flag (checked BEFORE running main.py)
+if [ "$1" = "--update" ]; then
+    echo "========================================"
+    echo "  oh-my-agents — Update"
+    echo "========================================"
+    echo ""
+    $PYTHON_CMD main.py --update
+    exit $?
+fi
+
+# 6. Handle --install-global flag (checked BEFORE running main.py)
 if [ "$1" = "--install-global" ]; then
     echo "[4/4] Installing globally..."
     TARGET="/usr/local/bin/oh-my-agents"
@@ -67,12 +87,12 @@ GLOBALEOF
     exit 0
 fi
 
-# 5. Run CLI (interactive mode)
+# 4. Run CLI (interactive mode)
 echo "[4/4] Starting system..."
 echo ""
 $PYTHON_CMD main.py
 
-# 6. Suggest global install for future use
+# 7. Suggest global install for future use
 echo ""
 echo "========================================"
 echo "  Tip: Install globally?"

@@ -6,7 +6,7 @@
 
 [![OpenCode](https://img.shields.io/badge/Built_for-OpenCode_Go-00D4AA?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTVNMiAxN2wxMCA1IDEwLTVNMiAxMmwxMCA1IDEwLTUiLz48L3N2Zz4=)](https://opencode.ai)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-1.2.0-blue?style=for-the-badge)](https://github.com/visualiaconsulting/oh-my-agents/releases/tag/v1.2.0)
+[![Version](https://img.shields.io/badge/version-1.3.3-blue?style=for-the-badge)](https://github.com/visualiaconsulting/oh-my-agents/releases/tag/v1.3.3)
 [![GitHub Stars](https://img.shields.io/github/stars/visualiaconsulting/oh-my-agents?style=for-the-badge&logo=github)](https://github.com/visualiaconsulting/oh-my-agents/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/visualiaconsulting/oh-my-agents?style=for-the-badge&logo=github)](https://github.com/visualiaconsulting/oh-my-agents/issues)
 
@@ -123,6 +123,27 @@ python main.py --install-global
 
 This copies agent definitions to `~/.opencode/agents/`, which OpenCode reads automatically. The setup script does this automatically in step 5.
 
+> **💡 Tip:** After installing globally, run `python main.py --check-updates` periodically to ensure you have the latest version with the newest features and fixes.
+
+### 🧭 Path Resolution — SYSTEM_ROOT vs WORKING_ROOT
+
+oh-my-agents now separates two important concepts:
+
+| Concept | Path | Description |
+|---------|------|-------------|
+| **SYSTEM_ROOT** | `oh-my-agents/` (the cloned repo) | Where the framework code lives |
+| **WORKING_ROOT** | Your `cwd` (current project) | Where your project lives |
+
+**Behavior:**
+- **Sessions, logs, skills, and `context.md`** are always read/written relative to **WORKING_ROOT** (your active project). This ensures continuity even when the framework is installed globally.
+- **Agent `.md` files** are detected in 3 levels (first match wins):
+  1. `WORKING_ROOT/.opencode/agents/` — per-project override
+  2. `~/.opencode/agents/` — global installation
+  3. `SYSTEM_ROOT/.opencode/agents/` — agents bundled in the repo
+- Use `--dir DIR` to explicitly set the **WORKING_ROOT** when running `main.py` from a different directory.
+
+> **Before v1.2.1 (bug):** Sessions and skills were saved to `SYSTEM_ROOT/.opencode/`, breaking continuity when switching projects.
+
 ---
 
 ## 📝 Session Management
@@ -160,6 +181,8 @@ OpenCode Session → .opencode/logs/ → session_manager.py → .opencode/sessio
 | `python main.py --sessions` | List all recorded sessions in a table |
 | `python main.py --session-status` | Show a detailed summary of the last session |
 | `python main.py --session <id>` | Show details of a specific session by ID |
+
+> **📍 Storage location:** Session records are always saved to `WORKING_ROOT/.opencode/sessions/` — your active project directory. This means you can have the framework installed globally while maintaining separate session histories per project.
 
 ### Example workflow
 
@@ -222,6 +245,38 @@ The `@summarizer` is a lightweight agent (`opencode-go/minimax-m2.5`) designed f
 4. Writes the session summary
 5. Suggests improvements to `agents.md` if relevant
 6. Can download skills from skills.sh if requested
+
+---
+
+## 🔄 Automatic Updates
+
+oh-my-agents can update itself automatically from GitHub releases.
+
+### Check for updates
+```bash
+python main.py --check-updates
+```
+
+### Update to latest version
+```bash
+python main.py --update
+```
+
+The updater will:
+1. Query the GitHub API for the latest release
+2. Download the release archive
+3. Preserve your sessions, skills, logs, and `.git` history
+4. Overwrite framework files with the new version
+5. Update the `VERSION` file
+
+You can also update via setup scripts:
+```bash
+./setup.sh --update
+powershell -File setup.ps1 --update
+```
+
+### Update via menu
+Run `python main.py` and select **"Check for updates"** from the interactive menu.
 
 ---
 
@@ -477,7 +532,8 @@ oh-my-agents/
 | `--setup` | Force the setup wizard to reconfigure agents |
 | `--doctor` | Diagnose environment issues (Python, deps, OpenCode CLI, agents, sessions, skills) |
 | `--install-global` | Copy agent `.md` files to `~/.opencode/agents/` for global use |
-| `--dir DIR` | Override the auto-detected project root directory |
+| `--uninstall` | Remove global installation (agents, sessions, skills, config). Available via interactive menu or setup scripts |
+| `--dir DIR` | Override the auto-detected project root directory (WORKING_ROOT) |
 | `--sessions` | List recorded sessions |
 | `--session <id>` | Show details of a specific session |
 | `--session-status` | Show summary of the last session |
@@ -486,10 +542,43 @@ oh-my-agents/
 | `--skills-search <q>` | Search skills on skills.sh |
 | `--skills-install <id>` | Install a skill (owner/repo/name) |
 | `--skills-remove <name>` | Remove an installed skill |
+| `--version` | Show current version |
+| `--check-updates` | Check if a newer version is available on GitHub |
+| `--update` | Update oh-my-agents to the latest release |
 
 ---
 
 ## 📝 Changelog
+
+### v1.3.3 — Automatic Update System (April 2026)
+
+- **Auto-updater:** `update_manager.py` checks GitHub releases and downloads updates automatically
+- **New CLI flags:** `--update`, `--check-updates`, `--version`
+- **Update strategies:** GitHub ZIP download (fallback for non-git installs)
+- **Data preservation:** Sessions, skills, logs, and `.git` history are never overwritten
+- **Setup scripts:** Both `setup.sh` and `setup.ps1` support `--update`
+
+### v1.2.1 — Path Separation, Uninstall & 3-Level Agent Discovery (April 2026)
+
+**Critical fix — SYSTEM_ROOT vs WORKING_ROOT separation:**
+- **Before (bug):** Sessions, logs, skills, and `context.md` were saved to `SYSTEM_ROOT/.opencode/`, breaking continuity when the framework was run from a different working directory.
+- **After (fixed):** All runtime data (sessions, logs, skills, context.md) is now read/written relative to `WORKING_ROOT` (the current project directory).
+- Introduced `resolve_working_root()` in `utils.py` — determines the active project directory.
+- Introduced `find_agent_source()` — 3-level agent discovery:
+  1. `WORKING_ROOT/.opencode/agents/` (local override)
+  2. `~/.opencode/agents/` (global install)
+  3. `SYSTEM_ROOT/.opencode/agents/` (repo bundled)
+
+**New command: `--uninstall`**
+- Removes `~/.opencode/agents/`, `sessions/`, `skills/`, `config.json` interactively
+- Also removes the `oh-my-agents` wrapper from `~/.local/bin/` or `/usr/local/bin/` (Linux/Mac)
+- Available in the interactive menu: "Uninstall globally"
+- Also accessible via setup scripts: `./setup.sh --uninstall` or `powershell -File setup.ps1 --uninstall`
+
+**Other improvements:**
+- `--dir` now explicitly defines `WORKING_ROOT` (not `SYSTEM_ROOT`)
+- All `session_manager.py` and `skill_registry.py` operations use `project_root` parameter
+- Tests updated to reflect new path behavior (66 tests passing)
 
 ### v1.2.0 — 8 Agents with Benchmark-Optimized Models (April 2026)
 

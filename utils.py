@@ -11,6 +11,48 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional
 
+SYSTEM_ROOT = Path(__file__).parent.resolve()
+
+
+def get_system_root() -> Path:
+    """Return the directory where oh-my-agents is installed (system root)."""
+    return SYSTEM_ROOT
+
+
+def resolve_working_root(explicit_dir: Optional[str] = None) -> Path:
+    """Return the active project directory.
+
+    Priority:
+    1. explicit_dir if provided
+    2. Path.cwd() (current working directory)
+    """
+    if explicit_dir:
+        return Path(explicit_dir).resolve()
+    return Path.cwd().resolve()
+
+
+def find_agent_source(working_root: Optional[Path] = None) -> Optional[Path]:
+    """Find the directory containing agent .md files.
+
+    Search order:
+    1. working_root/.opencode/agents/ (local project override)
+    2. ~/.opencode/agents/ (global install)
+    3. system_root/.opencode/agents/ (repo bundled agents)
+
+    Returns the first directory that exists and contains at least one .md file,
+    or None if nothing found.
+    """
+    candidates = []
+    if working_root:
+        candidates.append(working_root / ".opencode" / "agents")
+    candidates.append(Path.home() / ".opencode" / "agents")
+    candidates.append(get_system_root() / ".opencode" / "agents")
+
+    for candidate in candidates:
+        if candidate.exists() and any(candidate.glob("*.md")):
+            return candidate
+    return None
+
 
 def get_opencode_dir(project_root: Optional[Path] = None) -> Path:
     """Return the .opencode directory path."""

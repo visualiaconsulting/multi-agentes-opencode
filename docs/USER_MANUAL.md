@@ -1,4 +1,4 @@
-# 📖 Manual de Usuario — oh-my-agents v1.2.2
+# 📖 Manual de Usuario — oh-my-agents v1.3.3
 
 > Guía completa para instalar, configurar y usar el sistema de agentes multi-especialista en OpenCode.
 
@@ -581,7 +581,7 @@ opencode --agent orchestrator
 | Dato | Valor |
 |------|-------|
 | Repositorio | [visualiaconsulting/oh-my-agents](https://github.com/visualiaconsulting/oh-my-agents) |
-| Versión | 1.2.2 |
+| Versión | 1.3.3 |
 | Licencia | MIT |
 | Skills | [skills.sh](https://skills.sh) |
 | OpenCode | [opencode.ai](https://opencode.ai) |

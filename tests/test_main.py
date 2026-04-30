@@ -9,7 +9,9 @@ class TestLoadAgents:
 
     def test_loads_agent_metadata(self, temp_project):
         from main import load_agents
-        agents = load_agents(project_root=temp_project)
+        agent_dir = temp_project / ".opencode" / "agents"
+        with patch("utils.find_agent_source", return_value=agent_dir):
+            agents = load_agents()
         assert len(agents) == 2
         names = [a["name"] for a in agents]
         assert "@orchestrator" in names
@@ -17,21 +19,25 @@ class TestLoadAgents:
 
     def test_agents_have_model(self, temp_project):
         from main import load_agents
-        agents = load_agents(project_root=temp_project)
+        agent_dir = temp_project / ".opencode" / "agents"
+        with patch("utils.find_agent_source", return_value=agent_dir):
+            agents = load_agents()
         orch = next(a for a in agents if a["name"] == "@orchestrator")
         assert orch["model"] == "opencode-go/kimi-k2.6"
         assert orch["role"] == "Primary"
 
     def test_no_agents_dir_returns_empty(self, temp_empty_project):
         from main import load_agents
-        agents = load_agents(project_root=temp_empty_project)
+        with patch("utils.find_agent_source", return_value=None):
+            agents = load_agents()
         assert agents == []
 
     def test_empty_dir_returns_empty(self, temp_empty_project):
         from main import load_agents
         agent_dir = temp_empty_project / ".opencode" / "agents"
         agent_dir.mkdir(parents=True)
-        agents = load_agents(project_root=temp_empty_project)
+        with patch("utils.find_agent_source", return_value=agent_dir):
+            agents = load_agents()
         assert agents == []
 
     def test_invalid_yaml_is_skipped(self, temp_empty_project):
@@ -44,7 +50,8 @@ class TestLoadAgents:
 ---
 body
 """, encoding="utf-8")
-        agents = load_agents(project_root=temp_empty_project)
+        with patch("utils.find_agent_source", return_value=agent_dir):
+            agents = load_agents()
         assert agents == []
 
 
@@ -95,8 +102,9 @@ class TestInstallGlobal:
         from main import install_global
 
         home_target = Path(temp_project) / "home" / ".opencode" / "agents"
-        with patch("pathlib.Path.home", return_value=Path(temp_project) / "home"):
-            result = install_global(project_root=temp_project)
+        with patch("pathlib.Path.home", return_value=Path(temp_project) / "home"), \
+             patch("main.SYSTEM_ROOT", new=temp_project):
+            result = install_global()
             assert result is True
             assert home_target.exists()
             md_files = list(home_target.glob("*.md"))
@@ -104,23 +112,25 @@ class TestInstallGlobal:
 
     def test_no_agents_dir_returns_false(self, temp_empty_project):
         from main import install_global
-        result = install_global(project_root=temp_empty_project)
+        with patch("main.SYSTEM_ROOT", new=temp_empty_project):
+            result = install_global()
         assert result is False
 
     def test_no_md_files_returns_false(self, temp_empty_project):
         from main import install_global
         agent_dir = temp_empty_project / ".opencode" / "agents"
         agent_dir.mkdir(parents=True)
-        result = install_global(project_root=temp_empty_project)
+        with patch("main.SYSTEM_ROOT", new=temp_empty_project):
+            result = install_global()
         assert result is False
 
 
-class TestProjectRoot:
-    """Tests for PROJECT_ROOT constant."""
+class TestSystemRoot:
+    """Tests for SYSTEM_ROOT constant."""
 
-    def test_project_root_is_parent_of_main(self):
-        from main import PROJECT_ROOT
-        main_file = PROJECT_ROOT / "main.py"
+    def test_system_root_is_parent_of_main(self):
+        from main import SYSTEM_ROOT
+        main_file = SYSTEM_ROOT / "main.py"
         assert main_file.exists()
 
 
@@ -129,8 +139,8 @@ class TestRunDoctor:
 
     def test_runs_without_error(self, temp_project):
         from main import run_doctor
-        run_doctor(project_root=temp_project)
+        run_doctor(working_root=temp_project)
 
     def test_runs_without_error_no_agents(self, temp_empty_project):
         from main import run_doctor
-        run_doctor(project_root=temp_empty_project)
+        run_doctor(working_root=temp_empty_project)

@@ -82,6 +82,34 @@ function Find-Python {
 }
 
 # ---------------------------------------------------------------------------
+# Handle -Uninstall flag
+# ---------------------------------------------------------------------------
+if ($args -contains "--uninstall" -or $args -contains "-Uninstall") {
+    Write-Host ""
+    Write-Host "========================================" -ForegroundColor Red
+    Write-Host "  oh-my-agents — Uninstall" -ForegroundColor Red
+    Write-Host "========================================" -ForegroundColor Red
+    Write-Host ""
+    $PythonCmd = Find-Python
+    & $PythonCmd main.py --uninstall
+    exit $LASTEXITCODE
+}
+
+# ---------------------------------------------------------------------------
+# Handle -Update flag
+# ---------------------------------------------------------------------------
+if ($args -contains "--update" -or $args -contains "-Update") {
+    Write-Host ""
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "  oh-my-agents — Update" -ForegroundColor Cyan
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host ""
+    $PythonCmd = Find-Python
+    & $PythonCmd main.py --update
+    exit $LASTEXITCODE
+}
+
+# ---------------------------------------------------------------------------
 # Banner
 # ---------------------------------------------------------------------------
 Write-Host ""

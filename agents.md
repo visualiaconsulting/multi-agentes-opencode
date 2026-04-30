@@ -80,13 +80,17 @@ The `PlanManager` is the logical brain that manages agent configuration based on
 Command-line interface that:
 - Displays the multi-agent system banner
 - Runs the setup wizard (`--setup`) if no agents are defined
-- Loads and displays agent status from `.opencode/agents/*.md`
+- Loads and displays agent status via `find_agent_source()` — 3-level discovery (local project → global → repo bundled)
 - Diagnoses environment issues (`--doctor`) — now includes model ID validation, session history, and skills status
 - Installs agents globally to `~/.opencode/agents/` (`--install-global`)
-- Supports explicit project root override (`--dir DIR`)
-- Uses `PROJECT_ROOT = Path(__file__).parent.resolve()` for path-independent operation
+- **Uninstalls** global installation (`--uninstall`) — removes agents, sessions, skills, config interactively
+- Supports explicit working root override (`--dir DIR`)
+- **Path separation:** `SYSTEM_ROOT` (install location) ≠ `WORKING_ROOT` (active project — CWD or `--dir`). Runtime data (sessions, logs, skills, context.md) always uses `WORKING_ROOT`.
 - **Session management:** `--sessions`, `--session <id>`, `--session-status`, `--summarize`
 - **Skills management:** `--skills`, `--skills-search <query>`, `--skills-install <id>`, `--skills-remove <name>`
+- **Version info:** `--version` — shows the current installed version
+- **Update checking:** `--check-updates` — queries GitHub API for newer releases
+- **Auto-update:** `--update` — downloads and applies the latest release automatically
 
 ### `session_manager.py` — Session Bitacora
 
@@ -124,6 +128,52 @@ The **Qwen3.6 Plus** and **Qwen3.5 Plus** models were previously removed from th
 ---
 
 ## 📝 Changelog
+
+### v1.3.3 — Automatic Update System (April 2026)
+
+**New features:**
+- **Auto-updater:** `update_manager.py` queries GitHub releases, downloads, and applies updates
+- **New CLI flags:** `--update`, `--check-updates`, `--version`
+- **Data-safe updates:** Preserves `.git/`, `.opencode/sessions/`, `.opencode/skills/`, `.opencode/logs/`
+- **Menu integration:** "Check for updates" in interactive menu
+
+**New files:**
+- `update_manager.py` — Update detection, download, and installation
+- `VERSION` — Current version tracker
+
+**Modified files:**
+- `main.py` — Added `--update`, `--check-updates`, `--version`, menu option
+- `setup.ps1` — Added `--update` handler
+- `setup.sh` — Added `--update` handler
+
+### v1.2.1 — Path Separation, Uninstall & 3-Level Agent Discovery (April 2026)
+
+**Critical fix — SYSTEM_ROOT vs WORKING_ROOT separation:**
+- **Problem:** Sessions, logs, skills, and `context.md` were saved to `SYSTEM_ROOT/.opencode/`, breaking continuity when the framework was run from a different working directory.
+- **Fix:** Introduced `resolve_working_root()` and `find_agent_source()` in `utils.py`. All runtime data now uses `WORKING_ROOT` (the active CWD or `--dir` path), not `SYSTEM_ROOT`.
+- Agent `.md` files are now discovered in 3 levels:
+  1. `WORKING_ROOT/.opencode/agents/` (per-project override)
+  2. `~/.opencode/agents/` (global installation)
+  3. `SYSTEM_ROOT/.opencode/agents/` (bundled with repo)
+
+**New command: `--uninstall`**
+- Interactive removal of global installation (`~/.opencode/`)
+- Removes agents, sessions, skills, and config individually
+- Also cleans up the `oh-my-agents` wrapper from `~/.local/bin/` or `/usr/local/bin/` (Linux/Mac)
+- Available via CLI flag, interactive menu, and setup scripts
+
+**New files:**
+- `utils.py` — Cross-platform path helpers (`resolve_working_root()`, `find_agent_source()`, `get_sessions_dir()`, `get_skills_dir()`, etc.)
+
+**Files modified:**
+- `main.py` — Added `--uninstall` flag, `run_uninstall()` function, `run_doctor()` now uses `working_root`
+- `utils.py` — Added `SYSTEM_ROOT`, `resolve_working_root()`, `find_agent_source()`, `get_*_dir()` helpers
+- `session_manager.py` — All operations now accept and use `project_root` parameter
+- `skill_registry.py` — All operations now accept and use `project_root` parameter
+- `cli/wizard.py` — Uses `working_root` from `main.py`
+- `setup.sh` — Added `--uninstall` handler before launching `main.py`
+- `setup.ps1` — Added `-Uninstall` handler before launching `main.py`
+- `tests/` — Updated test counts to 66
 
 ### v1.2.0 — 8 Agents with Benchmark-Optimized Models (April 2026)
 
@@ -386,6 +436,7 @@ Translated all documentation, comments, and user-facing strings from Spanish to 
 | 12 | All Python files used relative paths (`Path(".opencode/...")`) — broke when CWD ≠ project root | `main.py`, `wizard.py`, `plan_manager.py` | Changed to `Path(__file__).parent`-based resolution |
 | 13 | `setup.ps1` had no ExecutionPolicy guidance, no `cd` to script dir, only tried `python` | `setup.ps1` | Added `Set-Location $ScriptDir`, `Find-Python` function, ExecutionPolicy comments |
 | 14 | `setup.sh` had no `cd` to script dir, `--install-global` flag checked after `main.py` ran | `setup.sh` | Added `cd "$SCRIPT_DIR"`, moved flag check before `main.py` |
+| 15 | Sessions/skills/logs saved to SYSTEM_ROOT instead of WORKING_ROOT — broke continuity across projects | `main.py`, `session_manager.py`, `skill_registry.py`, `utils.py` (new) | Introduced `SYSTEM_ROOT` vs `WORKING_ROOT` separation. `find_agent_source()` for 3-level agent discovery. All runtime data now bound to active project. |
 
 ---
 
@@ -399,6 +450,8 @@ Translated all documentation, comments, and user-facing strings from Spanish to 
 ├── main.py                      # Multi-agent system CLI
 ├── session_manager.py           # Session logging and continuity
 ├── skill_registry.py            # Skills download and management
+├── update_manager.py            # Automatic update system
+├── VERSION                      # Current version tracker
 ├── utils.py                     # Cross-platform helpers
 ├── requirements.txt             # Python dependencies (now includes requests)
 ├── setup.ps1                    # Windows setup script (global install by default)
@@ -413,7 +466,7 @@ Translated all documentation, comments, and user-facing strings from Spanish to 
 │   ├── conftest.py              # Shared fixtures
 │   ├── test_plan_manager.py     # 22 tests: plans, models, validation
 │   ├── test_wizard.py           # 15 tests: defaults, permissions, save
-│   └── test_main.py             # 15 tests: agents, deps, global install
+│   └── test_main.py             # 15 tests: agents, deps, global install, uninstall
 ├── .github/
 │   └── workflows/
 │       └── ci.yml               # CI pipeline (test matrix + lint)
@@ -459,12 +512,14 @@ print(f"Available models: {pm.get_available_models()}")
 
 ## 🚀 Suggested Next Steps
 
-1. **Run tests locally:** `pytest tests/ -v` (58 tests, all current features covered)
+1. **Run tests locally:** `pytest tests/ -v` (66 tests, all current features covered)
 2. **Connectivity Validation:** Run `python main.py` to verify that the PlanManager correctly detects the environment
 3. **Delegation Tests:** Use `opencode --agent orchestrator` with a complex task to validate interaction between agents (works from any folder after global install)
 4. **Model Health Check:** Run `python main.py --doctor` to verify all agent model IDs are valid
 5. **Session Continuity:** Run `python main.py --summarize` after an OpenCode session to save the session record
 6. **Skills Exploration:** Run `python main.py --skills-search database` to find relevant skills for your project
+7. **Uninstall Test:** Run `python main.py --uninstall` to verify the interactive removal workflow works correctly (reinstall with `python main.py --install-global`)
+8. **Update test:** Run `python main.py --check-updates` to verify the update system can reach GitHub
 
 ---
 
