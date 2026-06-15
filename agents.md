@@ -22,7 +22,7 @@ The project implements an **Orchestrator and Specialists** architecture on the d
 
 | Agent | Role | Model (Go Plan) | Permissions | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| **@orchestrator** | Main Coordinator | `opencode-go/deepseek-v4-pro` | `Read, Task` | Breaks down complex tasks and delegates to sub-agents. Does NOT write code or execute commands. |
+| **@orchestrator** | Main Coordinator | `opencode-go/qwen3.7-plus` | `Read, Task` | Breaks down complex tasks and delegates to sub-agents. Does NOT write code or execute commands. |
 | **@python-engineer** | Python Backend | `opencode-go/minimax-m2.7` | `Edit, Bash, Read` | Backend engineer — Python, FastAPI, automation, APIs. |
 | **@db-architect** | PostgreSQL | `opencode-go/qwen3.6-plus` | `Edit, Bash, Read` | PostgreSQL specialist — schemas, queries, performance. |
 | **@structured-engineer** | Structured Data | `opencode-go/qwen3.5-plus` | `Edit, Bash, Read` | JSON, YAML, OpenAPI, Docker Compose specialist. |
@@ -57,6 +57,35 @@ The project implements an **Orchestrator and Specialists** architecture on the d
 | **@git-manager** | ✅ allow | ✅ allow | ✅ allow | ❌ deny |
 | **@test-engineer** | ✅ allow | ✅ allow | ✅ allow | ❌ deny |
 | **@prompt-engineer** | ✅ allow | ✅ allow | ✅ allow | ❌ deny |
+
+---
+
+## ⚡ REGLAS DE EFICIENCIA — COST SAVING
+
+Las siguientes reglas son **obligatorias** para el orchestrator y se aplican a todo el sistema multi-agente. Violar estas reglas desperdicia cuota de suscripción.
+
+| Regla | Descripción | Penalización |
+|-------|-------------|--------------|
+| **PARALLEL_IO** | Agrupar TODAS las lecturas/escrituras independientes en un solo turno. Nunca leer archivos secuencialmente. | `costo_excesivo` |
+| **MIN_VERBOSITY** | Máximo 2 líneas de explicación antes de ejecutar. No explicaciones de código después de escribir. | `consumo_suscripcion` |
+| **MAX_TURNS** | Máximo 10 turnos por tarea sin progreso sustancial. Delegar subtareas vía `task` si se requiere más. | `límite_alcanzado` |
+| **BATCH_EDIT** | Múltiples ediciones al mismo archivo → hacerlas en un solo turno. | `costo_excesivo` |
+| **NO_PLAN_IN_TEXT** | El plan debe ir en la primera llamada, no en párrafos antes. Ejecutar primero, corregir después. | `consumo_suscripcion` |
+
+**Ejemplo de cumplimiento:**
+
+```python
+# ❌ INCORRECTO — Secuencial + verboso
+read file1.md
+read file2.md
+read file3.md
+# "Ahora voy a analizar los archivos..."
+edit file1.md
+
+# ✅ CORRECTO — Paralelo + directo
+read [file1.md, file2.md, file3.md]  # Una sola llamada
+edit file1.md  # Sin explicación previa
+```
 
 ---
 
@@ -235,6 +264,23 @@ Alternatively, download a model with a known-good template from the [Recommended
 ---
 
 ## 📝 Changelog
+
+### v1.11.0 — Efficiency Rules & Cost Saving (June 2026)
+
+**Critical bug fix — Orchestrator loop cost:**
+- Added 5 mandatory efficiency rules to orchestrator system prompt to prevent subscription drain
+- Rules: PARALLEL_IO, MIN_VERBOSITY, MAX_TURNS (10), BATCH_EDIT, NO_PLAN_IN_TEXT
+- Orchestrator now enforces parallel I/O, minimal verbosity, turn limits, batched edits
+- Bug was in framework design: missing efficiency constraints in orchestrator system prompt
+
+**Files modified:**
+- `.opencode/agents/orchestrator.md` — Added 5 mandatory efficiency rules
+- `AGENTS.md` — Added efficiency rules section, fixed orchestrator model, updated changelog
+- `CONTEXT.md` — Updated orchestrator model reference
+
+**Documentation:**
+- Added "⚡ REGLAS DE EFICIENCIA — COST SAVING" section to AGENTS.md
+- Updated orchestrator model reference in AGENTS.md (line 25) and CONTEXT.md
 
 ### v1.9.0 — Unified Dashboard, Simplified Menu (May 2026)
 

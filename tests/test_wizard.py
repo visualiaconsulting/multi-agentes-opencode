@@ -115,13 +115,13 @@ class TestSetupDefaults:
         wizard = SetupWizard(project_root=temp_empty_project)
         wizard.setup_defaults()
         orch = next(a for a in wizard.agents if a["name"] == "orchestrator")
-        assert orch["model"] == "opencode-go/deepseek-v4-pro"
+        assert orch["model"] == "opencode-go/qwen3.7-plus"
 
     def test_validator_model_is_mimo(self, temp_empty_project):
         wizard = SetupWizard(project_root=temp_empty_project)
         wizard.setup_defaults()
         val = next(a for a in wizard.agents if a["name"] == "validator")
-        assert val["model"] == "opencode-go/mimo-v2.5-pro"
+        assert val["model"] == "opencode-go/deepseek-v4-pro"
 
 
 class TestSaveAll:

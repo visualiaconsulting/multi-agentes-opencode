@@ -9,7 +9,7 @@ version: 2.0.0
 This is a multi-agent system configured for the OpenCode Go plan with 15 specialized agents.
 The available agents are:
 
-- **@orchestrator** — Coordinator. Delegates complex tasks to sub-agents. Model: opencode-go/deepseek-v4-pro
+- **@orchestrator** — Coordinator. Delegates complex tasks to sub-agents. Model: opencode-go/qwen3.7-plus
 - **@python-engineer** — Backend engineer. Python, FastAPI, automation, APIs. Model: opencode-go/minimax-m2.7
 - **@db-architect** — PostgreSQL specialist. Schemas, queries, performance. Model: opencode-go/qwen3.6-plus
 - **@structured-engineer** — JSON, YAML, OpenAPI, Docker Compose specialist. Model: opencode-go/qwen3.5-plus
@@ -31,7 +31,7 @@ This project supports 4 provider plans, switchable via the dashboard:
 
 | Plan | How to Activate | Orchestrator Model |
 |------|-----------------|-------------------|
-| **Go** (default) | `python main.py --plan go` | `opencode-go/deepseek-v4-pro` |
+| **Go** (default) | `python main.py --plan go` | `opencode-go/qwen3.7-plus` |
 | **LM Studio** | `python main.py --plan lmstudio` | `lmstudio/<detected>` |
 | **GitHub Copilot** | `python main.py --plan copilot` | `copilot/claude-sonnet-4` |
 | **OpenRouter** | `python main.py --plan openrouter` | `openrouter/anthropic/claude-sonnet-4` |
