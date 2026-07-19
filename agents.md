@@ -22,21 +22,27 @@ The project implements an **Orchestrator and Specialists** architecture on the d
 
 | Agent | Role | Model (Go Plan) | Permissions | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| **@orchestrator** | Main Coordinator | `opencode-go/qwen3.7-plus` | `Read, Task` | Breaks down complex tasks and delegates to sub-agents. Does NOT write code or execute commands. |
-| **@python-engineer** | Python Backend | `opencode-go/minimax-m2.7` | `Edit, Bash, Read` | Backend engineer — Python, FastAPI, automation, APIs. |
-| **@db-architect** | PostgreSQL | `opencode-go/qwen3.6-plus` | `Edit, Bash, Read` | PostgreSQL specialist — schemas, queries, performance. |
-| **@structured-engineer** | Structured Data | `opencode-go/qwen3.5-plus` | `Edit, Bash, Read` | JSON, YAML, OpenAPI, Docker Compose specialist. |
-| **@docs-writer** | Documentation | `opencode-go/minimax-m2.5` | `Edit, Bash, Read` | Technical documentation writer — READMEs, manuals, wikis. |
+| **@orchestrator** | Main Coordinator | `opencode-go/deepseek-v4-pro` | `Read, Task` | Breaks down complex tasks and delegates to sub-agents. Does NOT write code or execute commands. |
+| **@python-engineer** | Python Backend | `opencode-go/deepseek-v4-flash` | `Edit, Bash, Read` | Backend engineer — Python, FastAPI, automation, APIs. |
+| **@db-architect** | PostgreSQL | `opencode-go/deepseek-v4-flash` | `Edit, Bash, Read` | PostgreSQL specialist — schemas, queries, performance. |
+| **@structured-engineer** | Structured Data | `opencode-go/deepseek-v4-flash` | `Edit, Bash, Read` | JSON, YAML, OpenAPI, Docker Compose specialist. |
+| **@docs-writer** | Documentation | `opencode-go/mimo-v2.5` | `Edit, Bash, Read` | Technical documentation writer — READMEs, manuals, wikis. |
 | **@bulk-processor** | Data Processor | `opencode-go/deepseek-v4-flash` | `Edit, Bash, Read` | Bulk data processing and repetitive tasks. |
-| **@validator** | QA Specialist | `opencode-go/mimo-v2.5-pro` | `Read Only` | Validation, linting, and quality review. No editing or bash. |
-| **@researcher** | Tech Research | `opencode-go/glm-5.1` | `Edit, Bash, Read` | Technical researcher — explores technologies and compares frameworks. |
-| **@frontend-engineer** | UI/UX | `opencode-go/qwen3.6-plus` | `Edit, Bash, Read` | UI/UX specialist — React, Next.js, Tailwind. |
+| **@validator** | QA Specialist | `opencode-go/deepseek-v4-pro` | `Read Only` | Validation, linting, and quality review. No editing or bash. |
+| **@researcher** | Tech Research | `opencode-go/mimo-v2.5` | `Edit, Bash, Read` | Technical researcher — explores technologies and compares frameworks. |
+| **@frontend-engineer** | UI/UX | `opencode-go/deepseek-v4-flash` | `Edit, Bash, Read` | UI/UX specialist — React, Next.js, Tailwind. |
 | **@devops** | Infrastructure | `opencode-go/deepseek-v4-flash` | `Edit, Bash, Read` | Docker, CI/CD, deployment specialist. |
-| **@ml-specialist** | ML Engineer | `opencode-go/minimax-m2.7` | `Edit, Bash, Read` | ML and data pipelines — training, inference, MLOps. |
-| **@security-reviewer** | Security | `opencode-go/mimo-v2.5-pro` | `Read Only` | Security auditor — code, APIs, authentication. |
+| **@ml-specialist** | ML Engineer | `opencode-go/kimi-k2.6` | `Edit, Bash, Read` | ML and data pipelines — training, inference, MLOps. |
+| **@security-reviewer** | Security | `opencode-go/minimax-m3` | `Read Only` | Security auditor — code, APIs, authentication. |
 | **@git-manager** | Git/Repo | `opencode-go/deepseek-v4-flash` | `Edit, Bash, Read` | Git specialist — commits, branches, changelogs. |
-| **@test-engineer** | Testing | `opencode-go/qwen3.5-plus` | `Edit, Bash, Read` | Testing specialist — pytest, unit/integration tests. |
-| **@prompt-engineer** | Prompt Design | `opencode-go/glm-5.1` | `Edit, Bash, Read` | Prompt designer for AI agents and workflows. |
+| **@test-engineer** | Testing | `opencode-go/deepseek-v4-flash` | `Edit, Bash, Read` | Testing specialist — pytest, unit/integration tests. |
+| **@prompt-engineer** | Prompt Design | `opencode-go/mimo-v2.5` | `Edit, Bash, Read` | Prompt designer for AI agents and workflows. |
+| **@summarizer** | Session Summarizer | `opencode-go/mimo-v2.5` | `Edit, Bash, Read` | Session analysis, report generation, context condensation. |
+| **@formatter** | Code Formatter | `opencode-go/mimo-v2.5` | `Edit, Bash, Read` | Code formatting, linting fixes, automated refactoring. |
+| **@changelog-writer** | Changelog Generator | `opencode-go/mimo-v2.5` | `Edit, Bash, Read` | Release notes, version history tracking, changelog management. |
+| **@architect** | System Architect | `opencode-go/minimax-m2.7` | `Edit, Bash, Read` | Project structure design, module layout, dependency graphs. |
+| **@api-designer** | API Design | `opencode-go/minimax-m2.7` | `Edit, Bash, Read` | REST/GraphQL endpoints, OpenAPI specs, contract-first dev. |
+| **@code-reviewer** | Code Review | `opencode-go/deepseek-v4-pro` | `Read Only` | PR analysis, issue detection, improvement suggestions. |
 
 ### 🔍 Permission Details by Agent
 
@@ -57,6 +63,12 @@ The project implements an **Orchestrator and Specialists** architecture on the d
 | **@git-manager** | ✅ allow | ✅ allow | ✅ allow | ❌ deny |
 | **@test-engineer** | ✅ allow | ✅ allow | ✅ allow | ❌ deny |
 | **@prompt-engineer** | ✅ allow | ✅ allow | ✅ allow | ❌ deny |
+| **@summarizer** | ✅ allow | ✅ allow | ✅ allow | ❌ deny |
+| **@formatter** | ✅ allow | ✅ allow | ✅ allow | ❌ deny |
+| **@changelog-writer** | ✅ allow | ✅ allow | ✅ allow | ❌ deny |
+| **@architect** | ✅ allow | ✅ allow | ✅ allow | ❌ deny |
+| **@api-designer** | ✅ allow | ✅ allow | ✅ allow | ❌ deny |
+| **@code-reviewer** | ❌ deny | ❌ deny | ✅ allow | ❌ deny |
 
 ---
 
@@ -96,7 +108,7 @@ edit file1.md  # Sin explicación previa
 The `PlanManager` is the logical brain that manages agent configuration based on the detected plan:
 
 - **Plan Detection:** Automatically identifies whether you are in `go`, `zen`, `api`, `enterprise`, `openrouter`, `copilot`, or `ollama` using environment variables and configuration files.
-- **Model Mapping:** Maps each role (`orchestrator`, `python-engineer`, `db-architect`, `structured-engineer`, `docs-writer`, `bulk-processor`, `validator`, `researcher`, `frontend-engineer`, `devops`, `ml-specialist`, `security-reviewer`, `git-manager`, `test-engineer`, `prompt-engineer`) to the optimal model for the active plan.
+- **Model Mapping:** Maps each role (`orchestrator`, `python-engineer`, `db-architect`, `structured-engineer`, `docs-writer`, `bulk-processor`, `validator`, `researcher`, `frontend-engineer`, `devops`, `ml-specialist`, `security-reviewer`, `git-manager`, `test-engineer`, `prompt-engineer`, `summarizer`, `formatter`, `changelog-writer`, `architect`, `api-designer`, `code-reviewer`) to the optimal model for the active plan.
 - **Fallbacks:** Provides backup models if the primary one is not available.
 - **API Key Validation:** Verifies that external providers have the necessary credentials (only for `api` and `openrouter` plans).
 
@@ -104,21 +116,27 @@ The `PlanManager` is the logical brain that manages agent configuration based on
 
 | Role | Model |
 |:---|:---|
-| Orchestrator | `opencode-go/qwen3.7-plus` |
-| Python Engineer | `opencode-go/minimax-m2.7` |
-| DB Architect | `opencode-go/qwen3.6-plus` |
-| Structured Engineer | `opencode-go/qwen3.5-plus` |
+| Orchestrator | `opencode-go/deepseek-v4-pro` |
+| Python Engineer | `opencode-go/deepseek-v4-flash` |
+| DB Architect | `opencode-go/deepseek-v4-flash` |
+| Structured Engineer | `opencode-go/deepseek-v4-flash` |
 | Docs Writer | `opencode-go/mimo-v2.5` |
 | Bulk Processor | `opencode-go/deepseek-v4-flash` |
 | Validator | `opencode-go/deepseek-v4-pro` |
-| Researcher | `opencode-go/glm-5.1` |
-| Frontend Engineer | `opencode-go/qwen3.6-plus` |
+| Researcher | `opencode-go/mimo-v2.5` |
+| Frontend Engineer | `opencode-go/deepseek-v4-flash` |
 | DevOps | `opencode-go/deepseek-v4-flash` |
-| ML Specialist | `opencode-go/minimax-m2.7` |
+| ML Specialist | `opencode-go/kimi-k2.6` |
 | Security Reviewer | `opencode-go/minimax-m3` |
 | Git Manager | `opencode-go/deepseek-v4-flash` |
-| Test Engineer | `opencode-go/minimax-m3` |
-| Prompt Engineer | `opencode-go/minimax-m3` |
+| Test Engineer | `opencode-go/deepseek-v4-flash` |
+| Prompt Engineer | `opencode-go/mimo-v2.5` |
+| Summarizer | `opencode-go/mimo-v2.5` |
+| Formatter | `opencode-go/mimo-v2.5` |
+| Changelog Writer | `opencode-go/mimo-v2.5` |
+| Architect | `opencode-go/minimax-m2.7` |
+| API Designer | `opencode-go/minimax-m2.7` |
+| Code Reviewer | `opencode-go/deepseek-v4-pro` |
 | Fallback | `opencode-go/minimax-m2.5` |
 
 ### ~~`opencode.jsonc`~~ — Removed
@@ -264,6 +282,48 @@ Alternatively, download a model with a known-good template from the [Recommended
 ---
 
 ## 📝 Changelog
+
+### v2.2.0 — 21 Agents, Cost Optimization & Bug Fixes (July 2026)
+
+**Expanded from 15 to 21 agents:**
+- Added 6 new specialized agents: `summarizer`, `formatter`, `changelog-writer`, `architect`, `api-designer`, `code-reviewer`
+- New agents distributed across cost-efficient models: 3 on `mimo-v2.5`, 2 on `minimax-m2.7`, 1 on `deepseek-v4-pro` (read-only)
+
+**Cost optimization — 10× more requests/month:**
+- Switched 9 agents to cheaper flash/mid-tier models
+- 7 agents on `deepseek-v4-flash` (massive capacity: 246,000 requests/5h)
+- 4 agents on `mimo-v2.5` (30,100 requests/5h each)
+- Orchestrator on `deepseek-v4-pro` (3,450 requests/5h) — high quality, moderate cost
+- ML specialist on `kimi-k2.6` — best MLE-bench score for ML tasks
+
+**PLAN_LIMITS updated with dollar-based budget tracking:**
+- Added `5h_dollars: 12`, `weekly_dollars: 30`, `monthly_dollars: 60`
+- Maintained backward compatibility with old keys (daily, weekly, monthly)
+
+**Bug fixes:**
+- **#20 — SkillRecommender import missing in main.py:** `run_skills_recommend()` referenced `SkillRecommender` without importing it. Added `from skill_recommender import SkillRecommender`.
+- **#21 — Dead FallbackManager import:** Removed `from plan_fallback import FallbackManager` from main.py (module no longer exists).
+- **#22 — PLAN_LIMITS hardcoded without dollar keys:** Added `5h_dollars`, `weekly_dollars`, `monthly_dollars` for budget tracking while keeping old keys for backward compatibility.
+
+**`_pick_models_for_plan()` now dynamic:**
+- Replaced hardcoded list of 15 roles with `pm.ALL_ROLES` — automatically picks up new agents.
+
+**Updated test suite for 21 agents:**
+- `test_wizard.py`: 15→21 agent count, orchestrator model assertion updated
+- `test_plan_manager.py`: Model assertions updated, 3 new dollar-based limit assertions
+
+**Files modified:**
+- `plan_manager.py` — 21 agents, new models, dollar-based limits, ALL_ROLES expanded
+- `main.py` — Fix #20 (SkillRecommender import), Fix #21 (remove FallbackManager), Fix #22 (dynamic roles)
+- `cli/wizard.py` — 21 agents with new models in defaults
+- `VERSION` — 2.2.0
+- `.opencode/agents/*.md` — 9 updated, 6 new agent files
+- `tests/test_plan_manager.py` — Updated model assertions, dollar limit tests
+- `tests/test_wizard.py` — 21 agents, updated model assertions
+- `agents.md` — Updated documentation for v2.2.0
+- `memory.md` — Updated session history
+
+**Tests:** 208 passing (all tests updated for 21-agent system)
 
 ### v1.11.0 — Efficiency Rules & Cost Saving (June 2026)
 
@@ -759,6 +819,9 @@ Translated all documentation, comments, and user-facing strings from Spanish to 
 | 17 | LM Studio agents only installed to project dir — `opencode --agent orchestrator` still used Go plan | `lmstudio_manager.py` | Added `_install_agents_to_dir()` to write agents to both project `.opencode/agents/` and global `~/.opencode/agents/`. `reset_to_go()` restores both. |
 | 18 | Nemotron 3 Nano 4B Jinja2 template crashes every request (`Cannot apply filter "string" to type: NullValue`) | `lmstudio_manager.py` | Added `safe_assign_roles()` that detects broken models and reassigns them to `subagent`, keeping stable models for orchestrator. |
 | 19 | LM Studio models loaded with insufficient context (`n_keep >= n_ctx` error) | `README.md`, `AGENTS.md` | Documented fix: set Context Length ≥ 32768 in LM Studio Settings, then reload model or restart server. |
+| 20 | `run_skills_recommend()` referenced `SkillRecommender` without importing it | `main.py` | Added `from skill_recommender import SkillRecommender` |
+| 21 | Dead `from plan_fallback import FallbackManager` import in main.py | `main.py` | Removed the import (module no longer exists) |
+| 22 | `PLAN_LIMITS` had no dollar-based budget keys | `plan_manager.py` | Added `5h_dollars`, `weekly_dollars`, `monthly_dollars` while keeping old keys |
 
 ---
 
@@ -820,7 +883,13 @@ Translated all documentation, comments, and user-facing strings from Spanish to 
         ├── security-reviewer.md # Security auditor (read-only)
         ├── git-manager.md       # Git specialist
         ├── test-engineer.md     # Testing specialist
-        └── prompt-engineer.md   # Prompt designer
+        ├── prompt-engineer.md   # Prompt designer
+        ├── summarizer.md        # Session summarizer
+        ├── formatter.md         # Code formatter
+        ├── changelog-writer.md  # Changelog specialist
+        ├── architect.md         # System architect
+        ├── api-designer.md      # API designer
+        └── code-reviewer.md     # Code reviewer (read-only)
 ```
 
 ---
@@ -849,7 +918,7 @@ print(f"Available models: {pm.get_available_models()}")
 
 ## Suggested Next Steps
 
-1. **Run tests:** `pytest tests/ -v` (168 passing)
+1. **Run tests:** `pytest tests/ -v` (208 passing)
 2. **Open dashboard:** Run `python main.py` and explore all 4 providers
 3. **Try plans:** `python main.py --plan go`, `--plan lmstudio`, `--plan copilot`, `--plan openrouter`
 4. **Model Health Check:** Run `python main.py --doctor` to verify all agent model IDs are valid

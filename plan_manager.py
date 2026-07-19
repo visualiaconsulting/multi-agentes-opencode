@@ -28,21 +28,27 @@ class PlanManager:
 
     PLAN_MODELS = {
         "go": {
-            "orchestrator": "opencode-go/qwen3.7-plus",
-            "python-engineer": "opencode-go/minimax-m2.7",
-            "db-architect": "opencode-go/qwen3.6-plus",
-            "structured-engineer": "opencode-go/qwen3.5-plus",
+            "orchestrator": "opencode-go/deepseek-v4-pro",
+            "python-engineer": "opencode-go/deepseek-v4-flash",
+            "db-architect": "opencode-go/deepseek-v4-flash",
+            "structured-engineer": "opencode-go/deepseek-v4-flash",
             "docs-writer": "opencode-go/mimo-v2.5",
             "bulk-processor": "opencode-go/deepseek-v4-flash",
             "validator": "opencode-go/deepseek-v4-pro",
-            "researcher": "opencode-go/glm-5.1",
-            "frontend-engineer": "opencode-go/qwen3.6-plus",
+            "researcher": "opencode-go/mimo-v2.5",
+            "frontend-engineer": "opencode-go/deepseek-v4-flash",
             "devops": "opencode-go/deepseek-v4-flash",
-            "ml-specialist": "opencode-go/minimax-m2.7",
+            "ml-specialist": "opencode-go/kimi-k2.6",
             "security-reviewer": "opencode-go/minimax-m3",
             "git-manager": "opencode-go/deepseek-v4-flash",
-            "test-engineer": "opencode-go/minimax-m3",
-            "prompt-engineer": "opencode-go/minimax-m3",
+            "test-engineer": "opencode-go/deepseek-v4-flash",
+            "prompt-engineer": "opencode-go/mimo-v2.5",
+            "summarizer": "opencode-go/mimo-v2.5",
+            "formatter": "opencode-go/mimo-v2.5",
+            "changelog-writer": "opencode-go/mimo-v2.5",
+            "architect": "opencode-go/minimax-m2.7",
+            "api-designer": "opencode-go/minimax-m2.7",
+            "code-reviewer": "opencode-go/deepseek-v4-pro",
             "fallback": "opencode-go/minimax-m2.5",
             "all_available": [
                 "opencode-go/glm-5", "opencode-go/glm-5.1",
@@ -96,8 +102,12 @@ class PlanManager:
     }
     
     # Approximate limits per plan (for monitoring)
+    # Retrocompatibilidad: mantener keys viejas (daily, weekly, monthly) + agregar nuevas
     PLAN_LIMITS = {
-        "go": {"daily": 5000, "weekly": 25000, "monthly": 100000},
+        "go": {
+            "daily": 5000, "weekly": 25000, "monthly": 100000,
+            "5h_dollars": 12, "weekly_dollars": 30, "monthly_dollars": 60
+        },
         "lmstudio": {"daily": "unlimited", "weekly": "unlimited", "monthly": "unlimited"},
         "copilot": {"daily": "copilot_limits", "weekly": "copilot_limits", "monthly": "copilot_limits"},
         "openrouter": {"daily": "pay_as_you_go", "weekly": "pay_as_you_go", "monthly": "pay_as_you_go"}
@@ -120,6 +130,12 @@ class PlanManager:
         "git-manager":          {"edit": "allow", "bash": "allow", "read": "allow", "task": "deny"},
         "test-engineer":        {"edit": "allow", "bash": "allow", "read": "allow", "task": "deny"},
         "prompt-engineer":      {"edit": "allow", "bash": "allow", "read": "allow", "task": "deny"},
+        "summarizer":           {"edit": "allow", "bash": "allow", "read": "allow", "task": "deny"},
+        "formatter":            {"edit": "allow", "bash": "allow", "read": "allow", "task": "deny"},
+        "changelog-writer":     {"edit": "allow", "bash": "allow", "read": "allow", "task": "deny"},
+        "architect":            {"edit": "allow", "bash": "allow", "read": "allow", "task": "deny"},
+        "api-designer":         {"edit": "allow", "bash": "allow", "read": "allow", "task": "deny"},
+        "code-reviewer":        {"edit": "deny",  "bash": "deny",  "read": "allow", "task": "deny"},
     }
 
     ROLE_DESCRIPTIONS = {
@@ -138,13 +154,21 @@ class PlanManager:
         "git-manager":          "Git specialist for commits, branches, changelogs, and repo structure",
         "test-engineer":        "Testing specialist for pytest, unit tests, integration tests, and coverage",
         "prompt-engineer":      "Prompt designer for AI agent instructions and multi-agent workflows",
+        "summarizer":           "Session summarizer for analyzing logs, generating reports, and condensing context",
+        "formatter":            "Code formatter for consistent style, linting fixes, and automated refactoring",
+        "changelog-writer":     "Changelog specialist for generating release notes and version history",
+        "architect":            "System architect for designing project structure, module layout, and dependency graphs",
+        "api-designer":         "API designer for REST/GraphQL endpoints, OpenAPI specs, and contract-first development",
+        "code-reviewer":        "Code reviewer for analyzing pull requests, detecting issues, and suggesting improvements",
     }
 
     ALL_ROLES = [
         "orchestrator", "python-engineer", "db-architect", "structured-engineer",
         "docs-writer", "bulk-processor", "validator", "researcher",
         "frontend-engineer", "devops", "ml-specialist", "security-reviewer",
-        "git-manager", "test-engineer", "prompt-engineer"
+        "git-manager", "test-engineer", "prompt-engineer",
+        "summarizer", "formatter", "changelog-writer", "architect",
+        "api-designer", "code-reviewer"
     ]
 
     def __init__(self, plan: Optional[str] = None, project_root: Optional[Path] = None):
@@ -169,7 +193,7 @@ class PlanManager:
         return "go"
 
     def write_agent_files(self, working_root, plan_models=None):
-        """Write or overwrite all 8 agent .md files with the plan's models.
+        """Write or overwrite all agent .md files with the plan's models.
         
         Args:
             working_root: Project root directory
@@ -295,5 +319,3 @@ class PlanManager:
         self.plan = plan
         self.models = self.PLAN_MODELS.get(plan, self.PLAN_MODELS["go"])
         self.limits = self.PLAN_LIMITS.get(plan, self.PLAN_LIMITS["go"])
-
-

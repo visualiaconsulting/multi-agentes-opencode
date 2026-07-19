@@ -2,7 +2,7 @@
 name: python-engineer
 description: Python backend engineer — FastAPI, automation, APIs
 mode: subagent
-model: opencode-go/minimax-m2.7
+model: opencode-go/deepseek-v4-flash
 temperature: 0.2
 permission:
   edit: allow

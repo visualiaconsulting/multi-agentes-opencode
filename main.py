@@ -6,7 +6,7 @@ from pathlib import Path
 from update_manager import check_for_updates, run_update
 
 SYSTEM_ROOT = Path(__file__).parent.resolve()
-from plan_fallback import FallbackManager
+
 import json
 
 
@@ -357,6 +357,7 @@ def run_skills_recommend(working_root=None, auto_install=False):
     """Analyze project and recommend skills."""
     from cli.ui import console, print_success
     from utils import resolve_working_root
+    from skill_recommender import SkillRecommender
     import questionary
 
     if working_root is None:
@@ -623,10 +624,7 @@ def _pick_models_for_plan(plan: str, working_root):
         console.print(f"[red]No known models for plan '{plan}'.[/red]")
         return None
 
-    roles = ["orchestrator", "python-engineer", "db-architect", "structured-engineer",
-             "docs-writer", "bulk-processor", "validator", "researcher",
-             "frontend-engineer", "devops", "ml-specialist", "security-reviewer",
-             "git-manager", "test-engineer", "prompt-engineer"]
+    roles = pm.ALL_ROLES
 
     console.print(f"\n[bold cyan]Configure models for {pm.get_plan_display_name(plan)}[/bold cyan]")
     console.print("[dim]Choose a model for each role, or select 'Custom...' to type your own model ID.[/dim]\n")

@@ -1,29 +1,35 @@
 ---
 project: oh-my-agents
 plan: go
-version: 2.0.0
+version: 2.2.0
 ---
 
 # Project Context
 
-This is a multi-agent system configured for the OpenCode Go plan with 15 specialized agents.
+This is a multi-agent system configured for the OpenCode Go plan with 21 specialized agents.
 The available agents are:
 
-- **@orchestrator** — Coordinator. Delegates complex tasks to sub-agents. Model: opencode-go/qwen3.7-plus
-- **@python-engineer** — Backend engineer. Python, FastAPI, automation, APIs. Model: opencode-go/minimax-m2.7
-- **@db-architect** — PostgreSQL specialist. Schemas, queries, performance. Model: opencode-go/qwen3.6-plus
-- **@structured-engineer** — JSON, YAML, OpenAPI, Docker Compose specialist. Model: opencode-go/qwen3.5-plus
-- **@docs-writer** — Technical documentation writer. Model: opencode-go/minimax-m2.5
+- **@orchestrator** — Coordinator. Delegates complex tasks to sub-agents. Model: opencode-go/deepseek-v4-pro
+- **@python-engineer** — Backend engineer. Python, FastAPI, automation, APIs. Model: opencode-go/deepseek-v4-flash
+- **@db-architect** — PostgreSQL specialist. Schemas, queries, performance. Model: opencode-go/deepseek-v4-flash
+- **@structured-engineer** — JSON, YAML, OpenAPI, Docker Compose specialist. Model: opencode-go/deepseek-v4-flash
+- **@docs-writer** — Technical documentation writer. Model: opencode-go/mimo-v2.5
 - **@bulk-processor** — Bulk data processing and repetitive tasks. Model: opencode-go/deepseek-v4-flash
-- **@validator** — QA specialist. Validates code (read-only). Model: opencode-go/mimo-v2.5-pro
-- **@researcher** — Technical researcher. Explores technologies. Model: opencode-go/glm-5.1
-- **@frontend-engineer** — UI/UX specialist. React, Next.js, Tailwind. Model: opencode-go/qwen3.6-plus
+- **@validator** — QA specialist. Validates code (read-only). Model: opencode-go/deepseek-v4-pro
+- **@researcher** — Technical researcher. Explores technologies. Model: opencode-go/mimo-v2.5
+- **@frontend-engineer** — UI/UX specialist. React, Next.js, Tailwind. Model: opencode-go/deepseek-v4-flash
 - **@devops** — Infrastructure. Docker, CI/CD, deployment. Model: opencode-go/deepseek-v4-flash
-- **@ml-specialist** — ML and data pipeline specialist. Model: opencode-go/minimax-m2.7
-- **@security-reviewer** — Security auditor (read-only). Model: opencode-go/mimo-v2.5-pro
+- **@ml-specialist** — ML and data pipeline specialist. Model: opencode-go/kimi-k2.6
+- **@security-reviewer** — Security auditor (read-only). Model: opencode-go/minimax-m3
 - **@git-manager** — Git specialist. Commits, branches, changelogs. Model: opencode-go/deepseek-v4-flash
-- **@test-engineer** — Testing specialist. Pytest, unit/integration tests. Model: opencode-go/qwen3.5-plus
-- **@prompt-engineer** — Prompt designer for AI agents. Model: opencode-go/glm-5.1
+- **@test-engineer** — Testing specialist. Pytest, unit/integration tests. Model: opencode-go/deepseek-v4-flash
+- **@prompt-engineer** — Prompt designer for AI agents. Model: opencode-go/mimo-v2.5
+- **@summarizer** — Session summarizer. Logs, reports, context. Model: opencode-go/mimo-v2.5
+- **@formatter** — Code formatter. Style, linting, refactoring. Model: opencode-go/mimo-v2.5
+- **@changelog-writer** — Changelog specialist. Release notes, version history. Model: opencode-go/mimo-v2.5
+- **@architect** — System architect. Structure, modules, dependencies. Model: opencode-go/minimax-m2.7
+- **@api-designer** — API designer. REST/GraphQL, OpenAPI. Model: opencode-go/minimax-m2.7
+- **@code-reviewer** — Code reviewer. PR analysis, issue detection (read-only). Model: opencode-go/deepseek-v4-pro
 
 ### Provider Plans
 
@@ -31,7 +37,7 @@ This project supports 4 provider plans, switchable via the dashboard:
 
 | Plan | How to Activate | Orchestrator Model |
 |------|-----------------|-------------------|
-| **Go** (default) | `python main.py --plan go` | `opencode-go/qwen3.7-plus` |
+| **Go** (default) | `python main.py --plan go` | `opencode-go/deepseek-v4-pro` |
 | **LM Studio** | `python main.py --plan lmstudio` | `lmstudio/<detected>` |
 | **GitHub Copilot** | `python main.py --plan copilot` | `copilot/claude-sonnet-4` |
 | **OpenRouter** | `python main.py --plan openrouter` | `openrouter/anthropic/claude-sonnet-4` |

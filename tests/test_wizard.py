@@ -40,7 +40,7 @@ class TestSetupDefaults:
     def test_creates_fifteen_agents(self, temp_empty_project):
         wizard = SetupWizard(project_root=temp_empty_project)
         wizard.setup_defaults()
-        assert len(wizard.agents) == 15
+        assert len(wizard.agents) == 21
 
     def test_python_engineer_is_included(self, temp_empty_project):
         wizard = SetupWizard(project_root=temp_empty_project)
@@ -111,11 +111,11 @@ class TestSetupDefaults:
         assert pe["permissions"]["edit"] == "allow"
         assert pe["permissions"]["bash"] == "allow"
 
-    def test_orchestrator_model_is_qwen(self, temp_empty_project):
+    def test_orchestrator_model_is_deepseek(self, temp_empty_project):
         wizard = SetupWizard(project_root=temp_empty_project)
         wizard.setup_defaults()
         orch = next(a for a in wizard.agents if a["name"] == "orchestrator")
-        assert orch["model"] == "opencode-go/qwen3.7-plus"
+        assert orch["model"] == "opencode-go/deepseek-v4-pro"
 
     def test_validator_model_is_mimo(self, temp_empty_project):
         wizard = SetupWizard(project_root=temp_empty_project)
@@ -135,7 +135,7 @@ class TestSaveAll:
         agent_dir = temp_empty_project / ".opencode" / "agents"
         assert agent_dir.exists()
         md_files = list(agent_dir.glob("*.md"))
-        assert len(md_files) == 15
+        assert len(md_files) == 21
 
     def test_python_engineer_saved(self, temp_empty_project):
         wizard = SetupWizard(project_root=temp_empty_project)

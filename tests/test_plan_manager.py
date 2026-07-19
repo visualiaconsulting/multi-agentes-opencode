@@ -65,19 +65,19 @@ class TestGetModel:
 
     def test_orchestrator_model(self, clean_env):
         pm = PlanManager()
-        assert pm.get_model("orchestrator") == "opencode-go/qwen3.7-plus"
+        assert pm.get_model("orchestrator") == "opencode-go/deepseek-v4-pro"
 
     def test_python_engineer_model(self, clean_env):
         pm = PlanManager()
-        assert pm.get_model("python-engineer") == "opencode-go/minimax-m2.7"
+        assert pm.get_model("python-engineer") == "opencode-go/deepseek-v4-flash"
 
     def test_db_architect_model(self, clean_env):
         pm = PlanManager()
-        assert pm.get_model("db-architect") == "opencode-go/qwen3.6-plus"
+        assert pm.get_model("db-architect") == "opencode-go/deepseek-v4-flash"
 
     def test_structured_engineer_model(self, clean_env):
         pm = PlanManager()
-        assert pm.get_model("structured-engineer") == "opencode-go/qwen3.5-plus"
+        assert pm.get_model("structured-engineer") == "opencode-go/deepseek-v4-flash"
 
     def test_docs_writer_model(self, clean_env):
         pm = PlanManager()
@@ -93,11 +93,11 @@ class TestGetModel:
 
     def test_researcher_model(self, clean_env):
         pm = PlanManager()
-        assert pm.get_model("researcher") == "opencode-go/glm-5.1"
+        assert pm.get_model("researcher") == "opencode-go/mimo-v2.5"
 
     def test_frontend_engineer_model(self, clean_env):
         pm = PlanManager()
-        assert pm.get_model("frontend-engineer") == "opencode-go/qwen3.6-plus"
+        assert pm.get_model("frontend-engineer") == "opencode-go/deepseek-v4-flash"
 
     def test_devops_model(self, clean_env):
         pm = PlanManager()
@@ -105,7 +105,7 @@ class TestGetModel:
 
     def test_ml_specialist_model(self, clean_env):
         pm = PlanManager()
-        assert pm.get_model("ml-specialist") == "opencode-go/minimax-m2.7"
+        assert pm.get_model("ml-specialist") == "opencode-go/kimi-k2.6"
 
     def test_security_reviewer_model(self, clean_env):
         pm = PlanManager()
@@ -117,11 +117,11 @@ class TestGetModel:
 
     def test_test_engineer_model(self, clean_env):
         pm = PlanManager()
-        assert pm.get_model("test-engineer") == "opencode-go/minimax-m3"
+        assert pm.get_model("test-engineer") == "opencode-go/deepseek-v4-flash"
 
     def test_prompt_engineer_model(self, clean_env):
         pm = PlanManager()
-        assert pm.get_model("prompt-engineer") == "opencode-go/minimax-m3"
+        assert pm.get_model("prompt-engineer") == "opencode-go/mimo-v2.5"
 
     def test_fallback_model(self, clean_env):
         pm = PlanManager()
@@ -163,6 +163,9 @@ class TestPlanLimits:
         pm = PlanManager()
         assert pm.limits["daily"] == 5000
         assert pm.limits["weekly"] == 25000
+        assert pm.limits["5h_dollars"] == 12
+        assert pm.limits["weekly_dollars"] == 30
+        assert pm.limits["monthly_dollars"] == 60
 
 
 class TestValidateModels:

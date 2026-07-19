@@ -2,7 +2,7 @@
 name: test-engineer
 description: Testing specialist — pytest, unit/integration tests
 mode: subagent
-model: opencode-go/minimax-m3
+model: opencode-go/deepseek-v4-flash
 temperature: 0.2
 permission:
   edit: allow
